@@ -1,0 +1,2256 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,user-scalable=no"
+    />
+    <title>🍏 Золотая Рулетка</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        background: #f5f5f0;
+        color: #1a1a1a;
+        font-family: "Montserrat", system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        touch-action: manipulation;
+      }
+      :root {
+        --green: #1b5e20;
+        --green-l: #2e7d32;
+        --green-ll: #4caf50;
+        --gold: #c8a960;
+        --gold-l: #d4ba7a;
+        --gold-d: #a68b4b;
+        --bg: #f5f5f0;
+        --bg2: #eeeee8;
+        --bg3: #e5e5df;
+        --text: #1a1a1a;
+        --text2: #555;
+        --text3: #999;
+        --white: #fff;
+        --red: #d32f2f;
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bot: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* ── Scenes ── */
+      .scene {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.3s,
+          visibility 0s 0.3s;
+        z-index: 1;
+        background: var(--bg);
+      }
+      .scene.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition:
+          opacity 0.3s,
+          visibility 0s;
+      }
+      .scene.instant {
+        transition: none !important;
+      }
+
+      /* ── Loading ── */
+      #scene-loading {
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        background: var(--bg);
+      }
+      .loader {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--bg3);
+        border-top-color: var(--green);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      .loader-text {
+        color: var(--text3);
+        font-size: 13px;
+        margin-top: 14px;
+        font-weight: 600;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Wheel Scene ── */
+      #scene-wheel {
+        align-items: center;
+        justify-content: center;
+        padding: max(12px, var(--safe-top)) 20px max(12px, var(--safe-bot));
+      }
+      .wheel-header {
+        text-align: center;
+        flex-shrink: 0;
+        margin-bottom: 12px;
+      }
+      .wheel-logo {
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--green);
+        letter-spacing: -1px;
+        margin-bottom: 2px;
+      }
+      .wheel-logo span {
+        color: var(--gold);
+      }
+      .wheel-sub {
+        font-size: 13px;
+        color: var(--text2);
+        font-weight: 600;
+      }
+      .wheel-attempts {
+        font-size: 11px;
+        color: var(--text3);
+        font-weight: 600;
+        height: 16px;
+        margin-top: 2px;
+      }
+
+      .wheel-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+      }
+      .wheel-pointer {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      }
+      .wheel-pointer svg {
+        width: 32px;
+        height: 32px;
+      }
+
+      #wheel-canvas {
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 6px var(--green),
+          0 0 0 9px var(--gold),
+          0 8px 30px rgba(0, 0, 0, 0.15);
+        transition: filter 0.3s;
+      }
+      #wheel-canvas.spinning {
+        filter: brightness(1.05);
+      }
+
+      .wheel-center-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+        border: 3px solid var(--gold);
+        color: var(--white);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        z-index: 5;
+        box-shadow: 0 4px 15px rgba(27, 94, 32, 0.4);
+        transition:
+          transform 0.1s,
+          box-shadow 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+      }
+      .wheel-center-btn:active {
+        transform: translate(-50%, -50%) scale(0.92);
+      }
+      .wheel-center-btn:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        box-shadow: none;
+      }
+      .wheel-center-btn.pulse {
+        animation: btn-pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes btn-pulse {
+        0%,
+        100% {
+          box-shadow: 0 4px 15px rgba(27, 94, 32, 0.4);
+        }
+        50% {
+          box-shadow:
+            0 4px 30px rgba(27, 94, 32, 0.7),
+            0 0 20px rgba(200, 169, 96, 0.3);
+        }
+      }
+
+      .wheel-footer {
+        text-align: center;
+        margin-top: 16px;
+        flex-shrink: 0;
+      }
+      .wheel-hint {
+        font-size: 12px;
+        color: var(--text3);
+        font-weight: 500;
+      }
+
+      /* ── Done Scene ── */
+      #scene-done {
+        align-items: center;
+        padding: max(16px, var(--safe-top)) 24px max(24px, var(--safe-bot));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .done-wrap {
+        width: 100%;
+        max-width: 380px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .done-icon {
+        font-size: 40px;
+        margin-bottom: 4px;
+      }
+      .done-sticker {
+        width: 160px;
+        height: 160px;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .done-sticker img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 16px;
+      }
+      .done-prize {
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--green);
+        margin-bottom: 16px;
+      }
+      .done-prize .gold {
+        color: var(--gold);
+      }
+
+      .timer-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 14px;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        border: 1px solid var(--bg3);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      }
+      .timer-card::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(
+          circle,
+          rgba(27, 94, 32, 0.06),
+          transparent 70%
+        );
+        border-radius: 50%;
+      }
+      .timer-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .timer-time {
+        font-family: "Montserrat", sans-serif;
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--text);
+        letter-spacing: 2px;
+        line-height: 1;
+        min-width: 185px;
+        text-align: center;
+      }
+      .timer-time.done {
+        color: var(--green-ll);
+        font-size: 20px;
+        letter-spacing: 0;
+        min-width: auto;
+      }
+      .timer-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+        color: #fff;
+        font-weight: 800;
+        padding: 5px 11px;
+        border-radius: 20px;
+        font-size: 12px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .timer-pill.fast {
+        animation: pill-p 1s ease-in-out infinite;
+      }
+      @keyframes pill-p {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+      }
+      .timer-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text2);
+        font-weight: 600;
+      }
+      .timer-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: dot-b 1.5s ease-in-out infinite;
+        flex-shrink: 0;
+      }
+      .timer-dot.done {
+        background: var(--green-ll);
+        animation: none;
+      }
+      @keyframes dot-b {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .timer-progress {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 14px;
+      }
+      .tp-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        transition: background 0.3s;
+      }
+      .tp-dot.done {
+        background: var(--green-ll);
+      }
+      .tp-dot.active {
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+      }
+      .tp-dot.pending {
+        background: #ccc;
+      }
+      .tp-line {
+        width: 40px;
+        height: 3px;
+        border-radius: 2px;
+        transition: background 0.3s;
+      }
+      .tp-line.done {
+        background: var(--green-ll);
+      }
+      .tp-line.active {
+        background: linear-gradient(90deg, var(--green), #ccc);
+      }
+      .tp-line.pending {
+        background: var(--bg3);
+      }
+      .timer-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        padding: 0 4px;
+      }
+      .tp-label {
+        font-size: 10px;
+        color: var(--text3);
+        font-weight: 600;
+        text-align: center;
+        width: 60px;
+      }
+      .tp-label.done-l {
+        color: var(--green-ll);
+      }
+      .tp-label.active-l {
+        color: var(--green);
+      }
+
+      .done-actions {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+      }
+
+      /* ── Buttons ── */
+      .btn-primary {
+        position: relative;
+        width: 100%;
+        padding: 15px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
+        transition:
+          transform 0.1s,
+          opacity 0.3s;
+      }
+      .btn-primary:active {
+        transform: scale(0.95);
+      }
+      .btn-primary:disabled {
+        opacity: 0.35;
+        pointer-events: none;
+        box-shadow: none;
+      }
+      .btn-primary.pulse {
+        animation: btn-glow-g 1.5s ease-in-out infinite;
+      }
+      @keyframes btn-glow-g {
+        0%,
+        100% {
+          box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
+        }
+        50% {
+          box-shadow:
+            0 4px 30px rgba(27, 94, 32, 0.6),
+            0 0 20px rgba(200, 169, 96, 0.3);
+        }
+      }
+      .btn-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        animation: shine 2.5s ease-in-out infinite;
+      }
+      @keyframes shine {
+        0% {
+          left: -100%;
+        }
+        50%,
+        100% {
+          left: 100%;
+        }
+      }
+
+      .btn-action {
+        flex: 1;
+        padding: 13px 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        line-height: 1.3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-action:active {
+        transform: scale(0.95);
+      }
+      .btn-action.green {
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+        box-shadow: 0 4px 15px rgba(27, 94, 32, 0.25);
+      }
+      .btn-action.dark {
+        background: linear-gradient(135deg, #555, #333);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      }
+      .btn-action-icon {
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      /* ── Sheets ── */
+      .sheet-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+      .sheet-bg {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+      }
+      .sheet {
+        position: relative;
+        z-index: 1;
+        background: var(--white);
+        border-radius: 20px 20px 0 0;
+        padding: 10px 24px max(34px, var(--safe-bot));
+        max-height: 85vh;
+        overflow-y: auto;
+        text-align: center;
+        -webkit-overflow-scrolling: touch;
+      }
+      .sheet-handle {
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: #ddd;
+        margin: 0 auto 18px;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* ── Prize Sheet ── */
+      .prize-label {
+        font-size: 16px;
+        color: var(--text2);
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+      .prize-img-wrap {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .prize-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+      }
+      .prize-emoji-big {
+        font-size: 80px;
+      }
+      .prize-name {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--green);
+        margin-bottom: 6px;
+      }
+      .prize-brand {
+        font-size: 14px;
+        color: var(--gold-d);
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+      .prize-cd-wrap {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+      #prize-cd {
+        font-size: 42px;
+        font-weight: 900;
+        color: var(--green);
+        line-height: 1;
+      }
+
+      /* ── Subscribe Sheet ── */
+      .sub-sticker {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+      }
+      .sub-prize {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 14px;
+      }
+      .sub-desc {
+        font-size: 14px;
+        color: var(--text2);
+        margin-bottom: 12px;
+        line-height: 1.5;
+      }
+      .sub-progress {
+        font-size: 13px;
+        color: var(--green);
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      .sub-list {
+        list-style: none;
+        margin-bottom: 20px;
+      }
+      .sub-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--bg2);
+      }
+      .sub-item:last-child {
+        border-bottom: none;
+      }
+      .sub-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--bg2);
+        margin-right: 12px;
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: var(--text3);
+      }
+      .sub-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .sub-info {
+        flex: 1;
+        text-align: left;
+        min-width: 0;
+      }
+      .sub-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .sub-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--green);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-left: 10px;
+      }
+      .sub-btn.done {
+        background: var(--green-ll);
+        pointer-events: none;
+      }
+
+      /* ── Speed Sheet ── */
+      .su-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .su-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 22px;
+      }
+      .su-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .su-desc {
+        font-size: 13px;
+        color: var(--text2);
+        line-height: 1.5;
+        margin-bottom: 18px;
+      }
+      .su-stats {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: var(--bg2);
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 20px;
+      }
+      .su-stat-val {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--text);
+        line-height: 1;
+      }
+      .su-stat-label {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .su-divider {
+        width: 1px;
+        height: 40px;
+        background: var(--bg3);
+      }
+
+      .ref-track {
+        position: relative;
+        height: 8px;
+        background: var(--bg3);
+        border-radius: 4px;
+        margin: 10px 14px 52px;
+      }
+      .ref-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: linear-gradient(90deg, var(--green), var(--green-l));
+        border-radius: 4px;
+        transition: width 0.6s;
+      }
+      .ref-ms {
+        position: absolute;
+        top: -6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        background: #d0d0d0;
+        border: 3px solid #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        transform: translateX(-50%);
+        z-index: 2;
+      }
+      .ref-ms.on {
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+      }
+      .ref-ms-info {
+        position: absolute;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        white-space: nowrap;
+      }
+      .ref-ms-count {
+        font-size: 11px;
+        font-weight: 700;
+        color: #555;
+      }
+      .ref-ms-speed {
+        font-size: 10px;
+        color: #aaa;
+        font-weight: 600;
+      }
+      .ref-ms.on .ref-ms-count,
+      .ref-ms.on .ref-ms-speed {
+        color: var(--green);
+      }
+
+      .btn-share {
+        width: 100%;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #0088cc, #0077b5);
+        border: none;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform 0.1s;
+      }
+      .btn-share:active {
+        transform: scale(0.95);
+      }
+      .btn-share:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .share-tgs {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 16px;
+      }
+      .ref-hint {
+        font-size: 12px;
+        color: var(--text3);
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+      .btn-back {
+        background: none;
+        border: none;
+        color: var(--text3);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 12px;
+        padding: 8px;
+      }
+
+      /* ── Stars Modal ── */
+      .modal-fs {
+        position: fixed;
+        inset: 0;
+        background: var(--white);
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-fs-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--bg2);
+        flex-shrink: 0;
+      }
+      .modal-fs-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .modal-fs-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--bg2);
+        border: none;
+        font-size: 16px;
+        color: var(--text3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-fs-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        font-size: 15px;
+        color: var(--text2);
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      .modal-fs-body:empty::after {
+        content: "Загрузка...";
+        color: #ccc;
+      }
+
+      .btn-admin-edit {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--green), var(--green-l));
+        border: none;
+        font-size: 20px;
+        box-shadow: 0 4px 20px rgba(27, 94, 32, 0.4);
+        cursor: pointer;
+        z-index: 215;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .stars-edit-wrap {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .stars-textarea {
+        flex: 1;
+        width: 100%;
+        border: 2px solid var(--bg3);
+        border-radius: 14px;
+        padding: 14px;
+        font-size: 15px;
+        font-family: inherit;
+        resize: none;
+        line-height: 1.6;
+        outline: none;
+        background: var(--white);
+        color: var(--text);
+      }
+      .stars-textarea:focus {
+        border-color: var(--green);
+      }
+      .stars-edit-btns {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .btn-save {
+        flex: 1;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, var(--green-ll), var(--green-l));
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+      .btn-cancel {
+        flex: 1;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text2);
+        background: var(--bg2);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+
+      /* ── Effects ── */
+      #flash {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        z-index: 50;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        z-index: 9999;
+        transition: transform 0.3s;
+        pointer-events: none;
+        color: #fff;
+      }
+      .toast.error {
+        background: var(--red);
+      }
+      .toast.success {
+        background: var(--green-ll);
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .confetti-piece {
+        position: fixed;
+        pointer-events: none;
+        z-index: 50;
+        will-change: transform, opacity;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══ LOADING ═══ -->
+    <div id="scene-loading" class="scene active">
+      <div class="loader"></div>
+      <p class="loader-text">Загрузка...</p>
+    </div>
+
+    <!-- ═══ WHEEL ═══ -->
+    <div id="scene-wheel" class="scene">
+      <div class="wheel-header">
+        <div class="wheel-logo">ЗОЛОТАЯ <span>РУЛЕТКА</span></div>
+        <div class="wheel-sub">Крутите и выигрывайте!</div>
+        <div class="wheel-attempts" id="wheel-attempts"></div>
+      </div>
+      <div class="wheel-container" id="wheel-container">
+        <div class="wheel-pointer">
+          <svg viewBox="0 0 40 40">
+            <path
+              d="M20 38L8 8h24L20 38z"
+              fill="#C8A960"
+              stroke="#A68B4B"
+              stroke-width="1.5"
+            />
+            <path d="M20 34L11 12h18L20 34z" fill="#D4BA7A" />
+          </svg>
+        </div>
+        <canvas id="wheel-canvas" width="600" height="600"></canvas>
+        <button id="wheel-spin-btn" class="wheel-center-btn pulse">
+          КРУТИТЬ
+        </button>
+      </div>
+      <div class="wheel-footer">
+        <div class="wheel-hint">Нажмите кнопку чтобы испытать удачу</div>
+      </div>
+    </div>
+
+    <!-- ═══ DONE ═══ -->
+    <div id="scene-done" class="scene">
+      <div class="done-wrap">
+        <div class="done-icon" id="done-icon">✅</div>
+        <div class="done-sticker" id="done-sticker"></div>
+        <p class="done-prize" id="done-prize"></p>
+        <div class="timer-card">
+          <div class="timer-main">
+            <div class="timer-time" id="timer-time">24:00:00</div>
+            <div class="timer-pill" id="timer-pill">
+              ⚡ <span id="timer-speed">x1</span>
+            </div>
+          </div>
+          <div class="timer-status">
+            <div class="timer-dot" id="timer-dot"></div>
+            <span id="timer-text">Подготавливаем приз...</span>
+          </div>
+          <div class="timer-progress">
+            <div id="tp1" class="tp-dot done">✓</div>
+            <div id="tl1" class="tp-line done"></div>
+            <div id="tp2" class="tp-dot active">2</div>
+            <div id="tl2" class="tp-line active"></div>
+            <div id="tp3" class="tp-dot pending">3</div>
+          </div>
+          <div class="timer-labels">
+            <div id="tlbl1" class="tp-label done-l">Получен</div>
+            <div id="tlbl2" class="tp-label active-l">Обработка</div>
+            <div id="tlbl3" class="tp-label">Выдача</div>
+          </div>
+        </div>
+        <div id="done-actions-timer" class="done-actions">
+          <button id="btn-speedup" class="btn-action green">
+            <span class="btn-action-icon">🚀</span><span>Ускорить</span>
+          </button>
+          <button id="btn-earn-stars" class="btn-action dark">
+            <span class="btn-action-icon">⭐</span><span>Заработать</span>
+          </button>
+        </div>
+        <div id="done-actions-final" class="done-actions hidden">
+          <button id="btn-finalize" class="btn-primary pulse">
+            <span>🎁 Получить приз</span><span class="btn-shine"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Prize Sheet ═══ -->
+    <div id="sheet-prize" class="sheet-overlay hidden">
+      <div class="sheet-bg"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="prize-label">ВАМ ВЫПАЛО:</div>
+        <div class="prize-img-wrap" id="prize-img-wrap">
+          <div class="prize-emoji-big" id="prize-emoji">🎁</div>
+        </div>
+        <p class="prize-name" id="prize-name"></p>
+        <p class="prize-brand" id="prize-brand"></p>
+        <div class="prize-cd-wrap"><div id="prize-cd"></div></div>
+        <button id="btn-claim" class="btn-primary" disabled>
+          <span>ЗАБРАТЬ</span><span class="btn-shine"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ Subscribe Sheet ═══ -->
+    <div id="sheet-sub" class="sheet-overlay hidden">
+      <div class="sheet-bg"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sub-sticker" id="sub-sticker">🎁</div>
+        <p class="sub-prize" id="sub-prize"></p>
+        <p class="sub-desc">
+          Чтобы получить приз, подпишитесь на&nbsp;наших спонсоров:
+        </p>
+        <div class="sub-progress" id="sub-progress"></div>
+        <ul class="sub-list" id="sub-list"></ul>
+        <button id="btn-check-sub" class="btn-primary">
+          <span>Проверить подписку</span><span class="btn-shine"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ Speed Sheet ═══ -->
+    <div id="sheet-speed" class="sheet-overlay hidden">
+      <div class="sheet-bg"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="su-header">
+          <div class="su-icon">🚀</div>
+          <div class="su-title">Ускорить вывод</div>
+        </div>
+        <p class="su-desc">
+          Пригласи друзей — каждые 2 друга ускоряют таймер вдвое!
+        </p>
+        <div class="su-stats">
+          <div style="text-align: center">
+            <div class="su-stat-val" id="su-refs">0</div>
+            <div class="su-stat-label">Друзей</div>
+          </div>
+          <div class="su-divider"></div>
+          <div style="text-align: center">
+            <div class="su-stat-val" id="su-speed">x1</div>
+            <div class="su-stat-label">Скорость</div>
+          </div>
+        </div>
+        <div style="margin-bottom: 20px">
+          <div class="ref-track">
+            <div class="ref-fill" id="ref-fill" style="width: 0"></div>
+            <div class="ref-ms" id="ms2" style="left: 25%">
+              <div class="ref-ms-info">
+                <div class="ref-ms-count">2</div>
+                <div class="ref-ms-speed">x2</div>
+              </div>
+            </div>
+            <div class="ref-ms" id="ms4" style="left: 50%">
+              <div class="ref-ms-info">
+                <div class="ref-ms-count">4</div>
+                <div class="ref-ms-speed">x4</div>
+              </div>
+            </div>
+            <div class="ref-ms" id="ms6" style="left: 75%">
+              <div class="ref-ms-info">
+                <div class="ref-ms-count">6</div>
+                <div class="ref-ms-speed">x8</div>
+              </div>
+            </div>
+            <div class="ref-ms" id="ms8" style="left: 100%">
+              <div class="ref-ms-info">
+                <div class="ref-ms-count">8</div>
+                <div class="ref-ms-speed">x16</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button id="btn-share" class="btn-share">
+          <span class="share-tgs">✈️</span
+          ><span id="btn-share-text">Пригласить друга</span>
+        </button>
+        <p class="ref-hint">
+          Ваша реферальная ссылка будет прикреплена автоматически
+        </p>
+        <button id="btn-back-speed" class="btn-back">← Назад</button>
+      </div>
+    </div>
+
+    <!-- ═══ Stars Modal ═══ -->
+    <div id="modal-stars" class="modal-fs hidden">
+      <div class="modal-fs-header">
+        <span class="modal-fs-title">⭐ Заработать звёзды</span>
+        <button
+          id="btn-close-stars"
+          class="modal-fs-close"
+          aria-label="Закрыть"
+        >
+          ✕
+        </button>
+      </div>
+      <div id="stars-content" class="modal-fs-body"></div>
+      <div id="stars-edit" class="stars-edit-wrap hidden">
+        <textarea id="stars-ta" class="stars-textarea"></textarea>
+        <div class="stars-edit-btns">
+          <button id="btn-save-stars" class="btn-save">💾 Сохранить</button>
+          <button id="btn-cancel-edit" class="btn-cancel">Отмена</button>
+        </div>
+      </div>
+      <button id="btn-edit-stars" class="btn-admin-edit hidden">✏️</button>
+    </div>
+
+    <div id="flash"></div>
+    <div id="toast" class="toast"></div>
+
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
+    ></script>
+    <script>
+      window.addEventListener("load", () => {
+        const ck = setInterval(() => {
+          if (typeof gsap !== "undefined" && typeof confetti !== "undefined") {
+            clearInterval(ck);
+            startApp();
+          }
+        }, 30);
+      });
+
+      function startApp() {
+        const BOT = "premkarobot";
+        const T_SEC = 86400;
+
+        /* ═══ 8 PRIZE SECTORS ═══ */
+        const SECTORS = [
+          {
+            label: "Dior\nSauvage",
+            emoji: "🖤",
+            brand: "Dior",
+            color: "#1B5E20",
+            text: "#fff",
+          },
+          {
+            label: "Палетка\nCharlotte\nTilbury",
+            emoji: "🌸",
+            brand: "Charlotte Tilbury",
+            color: "#C8A960",
+            text: "#1a1a1a",
+          },
+          {
+            label: "MAC\nRuby Woo",
+            emoji: "💄",
+            brand: "MAC",
+            color: "#fff",
+            text: "#1a1a1a",
+          },
+          {
+            label: "Dyson\nAirwrap",
+            emoji: "✨",
+            brand: "Dyson",
+            color: "#1B5E20",
+            text: "#fff",
+          },
+          {
+            label: "YSL Libre\nParfum",
+            emoji: "🌹",
+            brand: "Yves Saint Laurent",
+            color: "#C8A960",
+            text: "#1a1a1a",
+          },
+          {
+            label: "La Mer\nКрем",
+            emoji: "💎",
+            brand: "La Mer",
+            color: "#fff",
+            text: "#1a1a1a",
+          },
+          {
+            label: "Sol de\nJaneiro Set",
+            emoji: "🍊",
+            brand: "Sol de Janeiro",
+            color: "#1B5E20",
+            text: "#fff",
+          },
+          {
+            label: "Набор\n50 000 ₽",
+            emoji: "⭐",
+            brand: "Золотая Рулетка",
+            color: "#C8A960",
+            text: "#1a1a1a",
+          },
+        ];
+
+        let CHANNELS = [],
+          US = null,
+          isAdmin = false;
+        const openedBots = new Set();
+        let claimedAt = null,
+          refCount = 0,
+          tSpeed = 1,
+          tInt = null;
+        let wonPrize = null,
+          wonSector = 0,
+          appState = "loading";
+        let isChecking = false,
+          isSharing = false;
+
+        const $ = (id) => document.getElementById(id);
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        const haptic = (t) => {
+          try {
+            Telegram.WebApp.HapticFeedback.impactOccurred(t);
+          } catch (e) {}
+        };
+        const hapticNotif = (t) => {
+          try {
+            Telegram.WebApp.HapticFeedback.notificationOccurred(t);
+          } catch (e) {}
+        };
+        function calcSpeed(r) {
+          return r >= 2 ? Math.pow(2, Math.floor(r / 2)) : 1;
+        }
+        function fmtTime(s) {
+          if (s <= 0) return null;
+          const h = Math.floor(s / 3600),
+            m = Math.floor((s % 3600) / 60),
+            sc = Math.floor(s % 60);
+          return [h, m, sc].map((v) => String(v).padStart(2, "0")).join(":");
+        }
+
+        let toastTimer = null;
+        function toast(t, tp = "error", ms = 3000) {
+          const el = $("toast");
+          el.textContent = t;
+          el.className = "toast " + tp;
+          if (toastTimer) clearTimeout(toastTimer);
+          requestAnimationFrame(() => el.classList.add("show"));
+          toastTimer = setTimeout(() => {
+            el.classList.remove("show");
+            toastTimer = null;
+          }, ms);
+        }
+
+        function showScene(id, instant = false) {
+          document.querySelectorAll(".scene").forEach((s) => {
+            if (instant) {
+              s.classList.add("instant");
+              s.classList.remove("active");
+              void s.offsetHeight;
+              s.classList.remove("instant");
+            } else s.classList.remove("active");
+          });
+          const el = $("scene-" + id);
+          if (instant) {
+            el.classList.add("instant");
+            el.classList.add("active");
+            void el.offsetHeight;
+            el.classList.remove("instant");
+          } else el.classList.add("active");
+        }
+
+        function openSheet(id) {
+          const ov = $(id),
+            bg = ov.querySelector(".sheet-bg"),
+            sh = ov.querySelector(".sheet");
+          ov.classList.remove("hidden");
+          if (bg) {
+            gsap.set(bg, { opacity: 0 });
+            gsap.to(bg, { opacity: 1, duration: 0.25 });
+          }
+          if (sh) {
+            gsap.set(sh, { y: "100%" });
+            gsap.to(sh, { y: "0%", duration: 0.4, ease: "power3.out" });
+          }
+          updateBackBtn();
+        }
+        function closeSheet(id, cb) {
+          const ov = $(id),
+            bg = ov.querySelector(".sheet-bg"),
+            sh = ov.querySelector(".sheet");
+          if (sh) {
+            gsap.killTweensOf(sh);
+            gsap.killTweensOf(bg);
+            gsap.to(sh, { y: "100%", duration: 0.3, ease: "power2.in" });
+            if (bg) gsap.to(bg, { opacity: 0, duration: 0.25 });
+            gsap.delayedCall(0.35, () => {
+              ov.classList.add("hidden");
+              updateBackBtn();
+              if (cb) cb();
+            });
+          } else {
+            ov.classList.add("hidden");
+            updateBackBtn();
+            if (cb) cb();
+          }
+        }
+        function updateBackBtn() {
+          try {
+            const stars = !$("modal-stars").classList.contains("hidden");
+            const speed = !$("sheet-speed").classList.contains("hidden");
+            if (stars || speed) Telegram.WebApp.BackButton.show();
+            else Telegram.WebApp.BackButton.hide();
+          } catch (e) {}
+        }
+        try {
+          Telegram.WebApp.BackButton.onClick(() => {
+            if (!$("modal-stars").classList.contains("hidden"))
+              $("btn-close-stars").click();
+            else if (!$("sheet-speed").classList.contains("hidden"))
+              closeSheet("sheet-speed");
+          });
+        } catch (e) {}
+
+        window.addEventListener("offline", () =>
+          toast("Нет интернета", "error", 5000),
+        );
+        window.addEventListener("online", () =>
+          toast("Соединение восстановлено", "success"),
+        );
+
+        function gID() {
+          try {
+            return Telegram.WebApp.initData;
+          } catch (e) {
+            return "";
+          }
+        }
+        async function api(ep, body = {}) {
+          for (let i = 0; i < 3; i++) {
+            try {
+              const r = await fetch(`/api/${ep}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ initData: gID(), ...body }),
+              });
+              if (!r.ok) {
+                if (r.status >= 400 && r.status < 500 && r.status !== 429)
+                  return { ok: false };
+                if (i < 2) {
+                  await sleep(1000 * (i + 1));
+                  continue;
+                }
+                return { ok: false };
+              }
+              return await r.json();
+            } catch (e) {
+              if (i < 2) {
+                await sleep(1000 * (i + 1));
+                continue;
+              }
+              return { ok: false, error: "network" };
+            }
+          }
+          return { ok: false };
+        }
+
+        /* ═══════════ WHEEL DRAWING ═══════════ */
+        const wCvs = $("wheel-canvas"),
+          wCtx = wCvs.getContext("2d");
+        let wheelSize = 300,
+          currentRotation = 0,
+          isSpinning = false;
+
+        function setupWheel() {
+          const container = $("wheel-container");
+          const maxW = Math.min(
+            window.innerWidth - 48,
+            window.innerHeight - 260,
+          );
+          wheelSize = Math.min(Math.max(Math.floor(maxW), 220), 380);
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          wCvs.width = wheelSize * dpr;
+          wCvs.height = wheelSize * dpr;
+          wCvs.style.width = wheelSize + "px";
+          wCvs.style.height = wheelSize + "px";
+          wCtx.setTransform(1, 0, 0, 1, 0, 0);
+          wCtx.scale(dpr, dpr);
+
+          const spinBtn = $("wheel-spin-btn");
+          const btnSize = Math.round(wheelSize * 0.22);
+          spinBtn.style.width = btnSize + "px";
+          spinBtn.style.height = btnSize + "px";
+          spinBtn.style.fontSize = Math.round(btnSize * 0.16) + "px";
+
+          drawWheel(currentRotation);
+        }
+
+        function drawWheel(rotation) {
+          const cx = wheelSize / 2,
+            cy = wheelSize / 2,
+            R = wheelSize / 2 - 4;
+          const n = SECTORS.length,
+            arc = (Math.PI * 2) / n;
+          wCtx.clearRect(0, 0, wheelSize, wheelSize);
+          wCtx.save();
+          wCtx.translate(cx, cy);
+          wCtx.rotate(rotation);
+
+          for (let i = 0; i < n; i++) {
+            const a = arc * i - Math.PI / 2;
+            wCtx.beginPath();
+            wCtx.moveTo(0, 0);
+            wCtx.arc(0, 0, R, a, a + arc);
+            wCtx.closePath();
+            wCtx.fillStyle = SECTORS[i].color;
+            wCtx.fill();
+            wCtx.strokeStyle = "rgba(0,0,0,.08)";
+            wCtx.lineWidth = 1.5;
+            wCtx.stroke();
+
+            // Sector border (gold inner lines)
+            wCtx.beginPath();
+            wCtx.moveTo(0, 0);
+            const ex = Math.cos(a) * R,
+              ey = Math.sin(a) * R;
+            wCtx.lineTo(ex, ey);
+            wCtx.strokeStyle = "rgba(200,169,96,.3)";
+            wCtx.lineWidth = 1;
+            wCtx.stroke();
+
+            // Text
+            wCtx.save();
+            wCtx.rotate(a + arc / 2);
+            const textR = R * 0.62;
+            wCtx.translate(textR, 0);
+            wCtx.rotate(Math.PI / 2);
+
+            // Emoji
+            wCtx.font = `${Math.round(wheelSize * 0.055)}px serif`;
+            wCtx.textAlign = "center";
+            wCtx.textBaseline = "middle";
+            wCtx.fillText(SECTORS[i].emoji, 0, -wheelSize * 0.08);
+
+            // Label (multiline)
+            wCtx.fillStyle = SECTORS[i].text;
+            wCtx.font = `700 ${Math.round(wheelSize * 0.032)}px Montserrat,sans-serif`;
+            const lines = SECTORS[i].label.split("\n");
+            const lh = wheelSize * 0.04;
+            const startY = (-lh * (lines.length - 1)) / 2 + wheelSize * 0.02;
+            lines.forEach((line, li) => {
+              wCtx.fillText(line, 0, startY + li * lh);
+            });
+
+            wCtx.restore();
+          }
+
+          // Inner ring
+          wCtx.beginPath();
+          wCtx.arc(0, 0, wheelSize * 0.18, 0, Math.PI * 2);
+          wCtx.fillStyle = "var(--bg)";
+          wCtx.fill();
+          wCtx.strokeStyle = "#C8A960";
+          wCtx.lineWidth = 3;
+          wCtx.stroke();
+
+          wCtx.restore();
+
+          // Outer ring
+          wCtx.beginPath();
+          wCtx.arc(cx, cy, R, 0, Math.PI * 2);
+          wCtx.strokeStyle = "#1B5E20";
+          wCtx.lineWidth = 5;
+          wCtx.stroke();
+          wCtx.beginPath();
+          wCtx.arc(cx, cy, R + 3, 0, Math.PI * 2);
+          wCtx.strokeStyle = "#C8A960";
+          wCtx.lineWidth = 2;
+          wCtx.stroke();
+
+          // Dots on outer ring
+          for (let i = 0; i < n; i++) {
+            const a = rotation + arc * i - Math.PI / 2;
+            const dx = cx + Math.cos(a) * (R - 6),
+              dy = cy + Math.sin(a) * (R - 6);
+            wCtx.beginPath();
+            wCtx.arc(dx, dy, 3, 0, Math.PI * 2);
+            wCtx.fillStyle = "#C8A960";
+            wCtx.fill();
+          }
+        }
+
+        /* ═══════════ SPIN ANIMATION ═══════════ */
+        async function spinWheel(targetSector) {
+          if (isSpinning) return;
+          isSpinning = true;
+          const btn = $("wheel-spin-btn");
+          btn.disabled = true;
+          btn.classList.remove("pulse");
+          wCvs.classList.add("spinning");
+
+          const n = SECTORS.length;
+          const arc = (Math.PI * 2) / n;
+
+          // Target angle: pointer is at top (−π/2), so sector center = −arc*target − arc/2
+          // We spin multiple full rotations + land on the sector
+          const fullSpins = 5 + Math.floor(Math.random() * 3); // 5-7 full rotations
+          const targetAngle = -(arc * targetSector + arc / 2);
+          // Normalize so it lands on the sector with some randomness within it
+          const jitter = (Math.random() - 0.5) * arc * 0.6;
+          const endRotation =
+            fullSpins * Math.PI * 2 + (-targetAngle + Math.PI / 2) + jitter;
+
+          const startRot = currentRotation;
+          const totalRot = endRotation - (startRot % (Math.PI * 2));
+
+          let lastSector = -1;
+
+          await new Promise((resolve) => {
+            const obj = { r: startRot };
+            gsap.to(obj, {
+              r: startRot + totalRot,
+              duration: 4 + Math.random(),
+              ease: "power4.out",
+              onUpdate() {
+                currentRotation = obj.r;
+                drawWheel(currentRotation);
+
+                // Tick haptic when passing sector boundary
+                const normR =
+                  ((currentRotation % (Math.PI * 2)) + Math.PI * 2) %
+                  (Math.PI * 2);
+                const curSec = Math.floor(normR / arc) % n;
+                if (curSec !== lastSector) {
+                  lastSector = curSec;
+                  haptic("light");
+                }
+              },
+              onComplete: resolve,
+            });
+          });
+
+          wCvs.classList.remove("spinning");
+          isSpinning = false;
+
+          // Celebration
+          haptic("heavy");
+          hapticNotif("success");
+          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+
+          await sleep(600);
+        }
+
+        /* ═══════════ SPIN BUTTON ═══════════ */
+        $("wheel-spin-btn").addEventListener("click", async () => {
+          if (appState !== "wheel" || isSpinning) return;
+          appState = "spinning";
+          haptic("medium");
+
+          const res = await api("process-action", { action: "spin_wheel" });
+          if (!res.ok || !res.prize) {
+            toast(
+              res.error === "Already played"
+                ? "Вы уже играли"
+                : "Ошибка сервера",
+            );
+            appState = "wheel";
+            $("wheel-spin-btn").disabled = false;
+            return;
+          }
+
+          wonPrize = res.prize;
+          // Find sector index by prize key
+          wonSector = SECTORS.findIndex((s) =>
+            s.label.includes(wonPrize.name.split(" ")[0]),
+          );
+          if (wonSector < 0)
+            wonSector = Math.floor(Math.random() * SECTORS.length);
+
+          await spinWheel(wonSector);
+          await showPrizeSheet();
+        });
+
+        /* ═══════════ PRIZE SHEET ═══════════ */
+        async function showPrizeSheet() {
+          const sector = SECTORS[wonSector];
+          $("prize-emoji").textContent = sector.emoji;
+          $("prize-name").textContent = wonPrize.name;
+          $("prize-brand").textContent = sector.brand;
+          $("btn-claim").disabled = true;
+          $("btn-claim").classList.remove("pulse");
+          $("prize-cd").textContent = "";
+
+          openSheet("sheet-prize");
+
+          // Countdown
+          for (let i = 3; i >= 1; i--) {
+            $("prize-cd").textContent = i;
+            $("prize-cd").style.color = "var(--green)";
+            gsap.fromTo(
+              $("prize-cd"),
+              { scale: 1.4, opacity: 0 },
+              { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" },
+            );
+            haptic("light");
+            await sleep(1000);
+          }
+          $("prize-cd").textContent = "ГОТОВО!";
+          $("prize-cd").style.color = "var(--green-ll)";
+          gsap.fromTo(
+            $("prize-cd"),
+            { scale: 1.4, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" },
+          );
+          hapticNotif("success");
+          confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+          await sleep(800);
+
+          $("btn-claim").disabled = false;
+          $("btn-claim").classList.add("pulse");
+          appState = "prize";
+        }
+
+        /* ═══════════ CLAIM → SUB ═══════════ */
+        $("btn-claim").addEventListener("click", () => {
+          $("btn-claim").classList.remove("pulse");
+          closeSheet("sheet-prize", showSub);
+        });
+
+        function updateSubProg() {
+          const d = document.querySelectorAll(".sub-btn.done").length;
+          $("sub-progress").textContent =
+            `Подписано ${d} из ${CHANNELS.length}`;
+        }
+        function showSub() {
+          const pName = wonPrize ? wonPrize.name : US?.prize_name || "Приз";
+          $("sub-prize").textContent = pName;
+          const list = $("sub-list");
+          list.innerHTML = "";
+          CHANNELS.forEach((ch) => {
+            const isBot = ch.type === "bot";
+            const li = document.createElement("li");
+            li.className = "sub-item";
+            const av = document.createElement("div");
+            av.className = "sub-avatar";
+            if (ch.avatar) {
+              const img = document.createElement("img");
+              img.src = ch.avatar;
+              img.loading = "lazy";
+              img.onerror = function () {
+                this.remove();
+                av.textContent = isBot ? "🤖" : "📢";
+              };
+              av.appendChild(img);
+            } else av.textContent = isBot ? "🤖" : "📢";
+            const info = document.createElement("div");
+            info.className = "sub-info";
+            const nm = document.createElement("div");
+            nm.className = "sub-name";
+            nm.textContent = ch.name;
+            info.appendChild(nm);
+            const btn = document.createElement("button");
+            btn.className = "sub-btn";
+            btn.textContent = isBot ? "Открыть" : "Подписаться";
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              try {
+                if (ch.link && ch.link.includes("t.me/"))
+                  Telegram.WebApp.openTelegramLink(ch.link);
+                else Telegram.WebApp.openLink(ch.link);
+              } catch (err) {
+                window.open(ch.link, "_blank");
+              }
+              if (isBot && !openedBots.has(ch.id)) {
+                openedBots.add(ch.id);
+                btn.textContent = "✓";
+                btn.classList.add("done");
+                updateSubProg();
+                api("process-action", {
+                  action: "mark_bot_opened",
+                  bot_id: ch.id,
+                }).catch(() => {});
+              }
+            });
+            li.append(av, info, btn);
+            list.appendChild(li);
+          });
+          updateSubProg();
+          openSheet("sheet-sub");
+          appState = "subscribe";
+        }
+
+        $("btn-check-sub").addEventListener("click", async () => {
+          if (isChecking) return;
+          isChecking = true;
+          const btn = $("btn-check-sub");
+          btn.disabled = true;
+          btn.querySelector("span").textContent = "Проверяем...";
+          try {
+            const res = await api("process-action", {
+              action: "check_subscriptions",
+            });
+            if (res.ok && res.all_subscribed) {
+              document.querySelectorAll(".sub-btn").forEach((b) => {
+                b.textContent = "✓";
+                b.classList.add("done");
+              });
+              updateSubProg();
+              toast("Подписки подтверждены!", "success");
+              refCount = res.referral_count || 0;
+              tSpeed = calcSpeed(refCount);
+              if (res.claimed_at) claimedAt = res.claimed_at;
+              else claimedAt = Date.now() / 1000;
+              await sleep(800);
+              closeSheet("sheet-sub", goToDone);
+            } else if (res.ok) {
+              const items = document.querySelectorAll(".sub-item");
+              CHANNELS.forEach((ch, i) => {
+                const b = items[i]?.querySelector(".sub-btn");
+                if (b) {
+                  const isB = ch.type === "bot";
+                  if (res.results?.[String(ch.id)]) {
+                    b.textContent = "✓";
+                    b.classList.add("done");
+                  } else {
+                    b.textContent = isB ? "Открыть" : "Подписаться";
+                    b.classList.remove("done");
+                  }
+                }
+              });
+              updateSubProg();
+              toast("Подпишитесь на все каналы!");
+              hapticNotif("error");
+            } else toast("Ошибка, попробуйте позже");
+          } catch (e) {
+            toast("Ошибка, попробуйте позже");
+          } finally {
+            btn.disabled = false;
+            btn.querySelector("span").textContent = "Проверить подписку";
+            isChecking = false;
+          }
+        });
+
+        /* ═══════════ DONE SCENE ═══════════ */
+        function resetTimerDots() {
+          $("tp2").className = "tp-dot active";
+          $("tp2").textContent = "2";
+          $("tp3").className = "tp-dot pending";
+          $("tp3").textContent = "3";
+          $("tl2").className = "tp-line active";
+          $("tlbl2").className = "tp-label active-l";
+          $("tlbl2").textContent = "Обработка";
+          $("tlbl3").className = "tp-label";
+          $("tlbl3").textContent = "Выдача";
+        }
+        function goToDone() {
+          const pName = wonPrize ? wonPrize.name : US?.prize_name || "Приз";
+          $("done-prize").textContent = pName;
+          const si = SECTORS.findIndex((s) =>
+            s.label.includes(pName.split(" ")[0]),
+          );
+          const sector = si >= 0 ? SECTORS[si] : SECTORS[0];
+          $("done-sticker").innerHTML =
+            `<div style="font-size:80px">${sector.emoji}</div>`;
+          if (!claimedAt) claimedAt = US?.claimed_at || Date.now() / 1000;
+          refCount = US?.referral_count || refCount || 0;
+          tSpeed = calcSpeed(refCount);
+          $("done-actions-timer").classList.remove("hidden");
+          $("done-actions-final").classList.add("hidden");
+          resetTimerDots();
+          startTimer();
+          showScene("done");
+          confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } });
+          gsap.from(".done-wrap", {
+            y: 40,
+            opacity: 0,
+            duration: 0.5,
+            ease: "back.out(1.5)",
+          });
+          appState = "final";
+        }
+
+        function startTimer() {
+          if (tInt) clearInterval(tInt);
+          updTimer();
+          tInt = setInterval(updTimer, 500);
+        }
+        function updTimer() {
+          if (!claimedAt) return;
+          const rem = Math.max(
+            0,
+            T_SEC - (Date.now() / 1000 - claimedAt) * tSpeed,
+          );
+          const t = fmtTime(rem);
+          const te = $("timer-time"),
+            sp = $("timer-speed"),
+            pill = $("timer-pill"),
+            dot = $("timer-dot"),
+            st = $("timer-text");
+          if (sp) sp.textContent = "x" + tSpeed;
+          if (pill) {
+            tSpeed > 1
+              ? pill.classList.add("fast")
+              : pill.classList.remove("fast");
+          }
+          if (!t) {
+            if (te) {
+              te.textContent = "Готово!";
+              te.classList.add("done");
+            }
+            if (dot) dot.classList.add("done");
+            if (st) st.textContent = "Приз готов к выдаче!";
+            [$("tp2"), $("tp3")].forEach((el) => {
+              if (el) {
+                el.className = "tp-dot done";
+                el.textContent = "✓";
+              }
+            });
+            if ($("tl2")) $("tl2").className = "tp-line done";
+            if ($("tlbl2")) {
+              $("tlbl2").className = "tp-label done-l";
+              $("tlbl2").textContent = "Готово";
+            }
+            if ($("tlbl3")) {
+              $("tlbl3").className = "tp-label done-l";
+              $("tlbl3").textContent = "Выдан";
+            }
+            if (pill) pill.style.display = "none";
+            $("done-actions-timer").classList.add("hidden");
+            $("done-actions-final").classList.remove("hidden");
+            clearInterval(tInt);
+            return;
+          }
+          if (te) {
+            te.textContent = t;
+            te.classList.remove("done");
+          }
+          if (dot) dot.classList.remove("done");
+          if (st) st.textContent = "Подготавливаем приз...";
+        }
+
+        $("btn-finalize").addEventListener("click", async () => {
+          const btn = $("btn-finalize");
+          btn.disabled = true;
+          btn.classList.remove("pulse");
+          btn.querySelector("span").textContent = "Обработка...";
+          const res = await api("process-action", { action: "finalize_claim" });
+          if (res.ok) {
+            hapticNotif("success");
+            toast("🎉 Приз получен!", "success");
+            confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } });
+            btn.querySelector("span").textContent = "✅ Получено";
+          } else {
+            toast(res.error || "Ошибка", "error");
+            btn.disabled = false;
+            btn.classList.add("pulse");
+            btn.querySelector("span").textContent = "🎁 Получить приз";
+          }
+        });
+
+        /* ═══════════ SPEED / SHARE ═══════════ */
+        $("btn-speedup").addEventListener("click", () => {
+          $("su-refs").textContent = refCount;
+          $("su-speed").textContent = "x" + tSpeed;
+          [2, 4, 6, 8].forEach((n) => {
+            const ms = $("ms" + n);
+            if (ms) {
+              refCount >= n
+                ? ms.classList.add("on")
+                : ms.classList.remove("on");
+            }
+          });
+          $("ref-fill").style.width = Math.min(100, (refCount / 8) * 100) + "%";
+          openSheet("sheet-speed");
+        });
+        $("btn-back-speed").addEventListener("click", () =>
+          closeSheet("sheet-speed"),
+        );
+
+        $("btn-share").addEventListener("click", async () => {
+          if (isSharing) return;
+          isSharing = true;
+          const btn = $("btn-share"),
+            btnText = $("btn-share-text");
+          btn.disabled = true;
+          btnText.textContent = "Подготовка...";
+          try {
+            const res = await api("prepare-share");
+            if (
+              res.ok &&
+              res.prepared_message_id &&
+              Telegram.WebApp.shareMessage
+            ) {
+              Telegram.WebApp.shareMessage(
+                res.prepared_message_id,
+                function (sent) {
+                  if (sent) {
+                    toast("Приглашение отправлено! 🎉", "success");
+                    hapticNotif("success");
+                  }
+                },
+              );
+            } else shareFallback();
+          } catch (e) {
+            shareFallback();
+          } finally {
+            btn.disabled = false;
+            btnText.textContent = "Пригласить друга";
+            isSharing = false;
+          }
+        });
+        function shareFallback() {
+          const uid = US?.telegram_id || "";
+          const link = `https://t.me/${BOT}?start=ref_${uid}`;
+          const text =
+            "🎁 Крути рулетку и выиграй подарок!\n\n💄 Dior, MAC, Dyson, La Mer\n✨ Это бесплатно! Жми 👇";
+          const shareUrl =
+            "https://t.me/share/url?url=" +
+            encodeURIComponent(link) +
+            "&text=" +
+            encodeURIComponent(text);
+          try {
+            Telegram.WebApp.openTelegramLink(shareUrl);
+          } catch (e) {
+            window.open(shareUrl, "_blank");
+          }
+        }
+
+        /* ═══════════ EARN STARS ═══════════ */
+        $("btn-earn-stars").addEventListener("click", async () => {
+          $("modal-stars").classList.remove("hidden");
+          updateBackBtn();
+          const c = $("stars-content");
+          if (!c.innerHTML) {
+            try {
+              const res = await api("get-page", { key: "stars" });
+              if (res.ok && res.content) c.textContent = res.content;
+              else c.textContent = "Контент загружается...";
+            } catch (e) {
+              c.textContent = "Ошибка загрузки";
+            }
+          }
+          if (isAdmin) $("btn-edit-stars").classList.remove("hidden");
+        });
+        $("btn-close-stars").addEventListener("click", () => {
+          $("modal-stars").classList.add("hidden");
+          $("stars-edit").classList.add("hidden");
+          $("stars-content").classList.remove("hidden");
+          updateBackBtn();
+        });
+        $("btn-edit-stars").addEventListener("click", () => {
+          $("stars-ta").value = $("stars-content").innerText || "";
+          $("stars-content").classList.add("hidden");
+          $("stars-edit").classList.remove("hidden");
+        });
+        $("btn-cancel-edit").addEventListener("click", () => {
+          $("stars-edit").classList.add("hidden");
+          $("stars-content").classList.remove("hidden");
+        });
+        $("btn-save-stars").addEventListener("click", async () => {
+          const t = $("stars-ta").value;
+          try {
+            await api("save-page", { key: "stars", content: t });
+            $("stars-content").textContent = t;
+            toast("Сохранено!", "success");
+          } catch (e) {
+            toast("Ошибка");
+          }
+          $("stars-edit").classList.add("hidden");
+          $("stars-content").classList.remove("hidden");
+        });
+
+        /* ═══════════ RESIZE ═══════════ */
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            if (appState === "wheel") setupWheel();
+          }, 200);
+        });
+
+        /* ═══════════ INIT ═══════════ */
+        async function init() {
+          try {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.disableVerticalSwipes();
+            Telegram.WebApp.setHeaderColor("#f5f5f0");
+            Telegram.WebApp.setBackgroundColor("#f5f5f0");
+          } catch (e) {}
+
+          try {
+            const res = await api("get-user");
+            if (res.ok) {
+              US = res.user;
+              CHANNELS = res.channels || [];
+              isAdmin = res.user.is_admin || false;
+              refCount = res.user.referral_count || 0;
+              tSpeed = calcSpeed(refCount);
+              if (res.user.claimed_at) claimedAt = res.user.claimed_at;
+            }
+          } catch (e) {}
+
+          $("scene-loading").style.opacity = "0";
+          await sleep(300);
+          try {
+            Telegram.WebApp.ready();
+          } catch (e) {}
+
+          if (!US) {
+            toast("Ошибка загрузки данных", "error", 10000);
+            return;
+          }
+
+          if (US.state === "completed") {
+            showScene("done", true);
+            $("done-prize").textContent = US.prize_name || "Приз";
+            const si = SECTORS.findIndex((s) =>
+              s.label.includes((US.prize_name || "").split(" ")[0]),
+            );
+            const sector = si >= 0 ? SECTORS[si] : SECTORS[0];
+            $("done-sticker").innerHTML =
+              `<div style="font-size:80px">${sector.emoji}</div>`;
+            $("timer-time").textContent = "Получено!";
+            $("timer-time").classList.add("done");
+            $("timer-dot").classList.add("done");
+            $("timer-text").textContent = "Приз выдан";
+            $("timer-pill").style.display = "none";
+            ["tp1", "tp2", "tp3"].forEach((id) => {
+              $(id).className = "tp-dot done";
+              $(id).textContent = "✓";
+            });
+            ["tl1", "tl2"].forEach((id) => {
+              $(id).className = "tp-line done";
+            });
+            $("tlbl1").className = "tp-label done-l";
+            $("tlbl1").textContent = "Получен";
+            $("tlbl2").className = "tp-label done-l";
+            $("tlbl2").textContent = "Готово";
+            $("tlbl3").className = "tp-label done-l";
+            $("tlbl3").textContent = "Выдан";
+            $("done-actions-timer").classList.add("hidden");
+            $("done-actions-final").classList.remove("hidden");
+            $("btn-finalize").disabled = true;
+            $("btn-finalize").classList.remove("pulse");
+            $("btn-finalize").querySelector("span").textContent = "✅ Получено";
+            gsap.from(".done-wrap", {
+              y: 30,
+              opacity: 0,
+              duration: 0.5,
+              delay: 0.1,
+            });
+            appState = "final";
+            return;
+          }
+          if (US.state === "claimed") {
+            wonPrize = {
+              key: US.prize_key || "stars",
+              name: US.prize_name || "Приз",
+            };
+            goToDone();
+            return;
+          }
+          if (US.state === "rolled") {
+            wonPrize = {
+              key: US.prize_key || "stars",
+              name: US.prize_name || "Приз",
+            };
+            showScene("wheel", true);
+            setupWheel();
+            $("wheel-spin-btn").disabled = true;
+            $("wheel-spin-btn").classList.remove("pulse");
+            $("wheel-spin-btn").textContent = "—";
+            await sleep(200);
+            showSub();
+            return;
+          }
+
+          showScene("wheel", true);
+          await new Promise((r) =>
+            requestAnimationFrame(() => requestAnimationFrame(r)),
+          );
+          setupWheel();
+          appState = "wheel";
+          gsap.from(".wheel-header", { y: 20, opacity: 0, duration: 0.4 });
+          gsap.from(".wheel-container", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.6,
+            delay: 0.15,
+            ease: "back.out(1.5)",
+          });
+          gsap.from(".wheel-footer", {
+            y: 20,
+            opacity: 0,
+            duration: 0.3,
+            delay: 0.3,
+          });
+        }
+        init();
+      }
+    </script>
+  </body>
+</html>
