@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width,initial-scale=1.0,user-scalable=no"
     />
-    <title>🍏 Золотая Рулетка</title>
+    <title>🍏 Рулетка Золотое Яблоко</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
@@ -19,28 +19,25 @@
         padding: 0;
         box-sizing: border-box;
       }
-      body {
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh;
-        overflow: hidden;
-        background: #f5f5f0;
-        color: #1a1a1a;
-        font-family: "Montserrat", system-ui, sans-serif;
-        -webkit-tap-highlight-color: transparent;
-        user-select: none;
-        touch-action: manipulation;
-      }
       :root {
-        --green: #1b5e20;
-        --green-l: #2e7d32;
-        --green-ll: #4caf50;
-        --gold: #c8a960;
-        --gold-l: #d4ba7a;
-        --gold-d: #a68b4b;
-        --bg: #f5f5f0;
-        --bg2: #eeeee8;
-        --bg3: #e5e5df;
+        /* Фирменные цвета Золотого Яблока */
+        --ga-green: #d2ff00;
+        --ga-green-hover: #bce600;
+        --ga-bg-top: #eceef1;
+        --ga-bg-bot: #d5d8df;
+        --ga-text: #1a1a1a;
+        --ga-text-muted: #888888;
+        --ga-card: #f8f9fb;
+
+        /* Оригинальные системные переменные, адаптированные под новый стиль */
+        --green: #d2ff00;
+        --green-l: #e0ff33;
+        --green-ll: #aeea00;
+        --gold: #aeea00; /* заменен на оттенок салатового для консистентности */
+        --gold-d: #8cbf00;
+        --bg: #eceef1;
+        --bg2: #e2e5e9;
+        --bg3: #d5d8df;
         --text: #1a1a1a;
         --text2: #555;
         --text3: #999;
@@ -48,6 +45,23 @@
         --red: #d32f2f;
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-bot: env(safe-area-inset-bottom, 0px);
+      }
+
+      body {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        background: linear-gradient(
+          180deg,
+          var(--ga-bg-top) 0%,
+          var(--ga-bg-bot) 100%
+        );
+        color: var(--text);
+        font-family: "Montserrat", system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        touch-action: manipulation;
       }
 
       /* ── Scenes ── */
@@ -63,7 +77,6 @@
           opacity 0.3s,
           visibility 0s 0.3s;
         z-index: 1;
-        background: var(--bg);
       }
       .scene.active {
         opacity: 1;
@@ -87,8 +100,8 @@
       .loader {
         width: 40px;
         height: 40px;
-        border: 3px solid var(--bg3);
-        border-top-color: var(--green);
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top-color: var(--ga-text);
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
       }
@@ -104,138 +117,242 @@
         }
       }
 
-      /* ── Wheel Scene ── */
+      /* ── НОВЫЙ WHEEL SCENE (ЗОЛОТОЕ ЯБЛОКО) ── */
       #scene-wheel {
-        align-items: center;
-        justify-content: center;
-        padding: max(12px, var(--safe-top)) 20px max(12px, var(--safe-bot));
+        justify-content: space-between;
+        padding: max(20px, var(--safe-top)) 0 max(30px, var(--safe-bot));
       }
-      .wheel-header {
-        text-align: center;
-        flex-shrink: 0;
-        margin-bottom: 12px;
-      }
-      .wheel-logo {
-        font-size: 28px;
-        font-weight: 900;
-        color: var(--green);
-        letter-spacing: -1px;
-        margin-bottom: 2px;
-      }
-      .wheel-logo span {
-        color: var(--gold);
-      }
-      .wheel-sub {
-        font-size: 13px;
-        color: var(--text2);
-        font-weight: 600;
-      }
-      .wheel-attempts {
-        font-size: 11px;
-        color: var(--text3);
-        font-weight: 600;
-        height: 16px;
-        margin-top: 2px;
-      }
-
-      .wheel-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 auto;
-      }
-      .wheel-pointer {
+      .top-toast {
         position: absolute;
-        top: -12px;
+        top: max(10px, var(--safe-top));
         left: 50%;
         transform: translateX(-50%);
-        z-index: 10;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-      }
-      .wheel-pointer svg {
-        width: 32px;
-        height: 32px;
-      }
-
-      #wheel-canvas {
-        border-radius: 50%;
-        box-shadow:
-          0 0 0 6px var(--green),
-          0 0 0 9px var(--gold),
-          0 8px 30px rgba(0, 0, 0, 0.15);
-        transition: filter 0.3s;
-      }
-      #wheel-canvas.spinning {
-        filter: brightness(1.05);
-      }
-
-      .wheel-center-btn {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--green), var(--green-l));
-        border: 3px solid var(--gold);
-        color: var(--white);
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        cursor: pointer;
-        z-index: 5;
-        box-shadow: 0 4px 15px rgba(27, 94, 32, 0.4);
-        transition:
-          transform 0.1s,
-          box-shadow 0.3s;
+        background: #1a1a1a;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
+        gap: 8px;
+        z-index: 10;
+        white-space: nowrap;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      }
+      .hero-decor {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: center;
-        line-height: 1.2;
+        text-align: center;
+        padding: 0 20px;
+        position: relative;
+        margin-top: 40px;
       }
-      .wheel-center-btn:active {
-        transform: translate(-50%, -50%) scale(0.92);
+      .hero-title {
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 10px;
+        z-index: 2;
+        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
       }
-      .wheel-center-btn:disabled {
-        opacity: 0.5;
-        pointer-events: none;
-        box-shadow: none;
+      .hero-prize-huge {
+        font-size: 52px;
+        font-weight: 900;
+        letter-spacing: -2px;
+        color: transparent;
+        background: linear-gradient(180deg, #ffffff 0%, #b0b5bd 100%);
+        -webkit-background-clip: text;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+        z-index: 2;
       }
-      .wheel-center-btn.pulse {
-        animation: btn-pulse 1.5s ease-in-out infinite;
+      .floating-item {
+        position: absolute;
+        font-size: 40px;
+        filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.1));
+        z-index: 1;
       }
-      @keyframes btn-pulse {
+      .fl-1 {
+        top: 10%;
+        left: 15%;
+        animation: float 4s ease-in-out infinite;
+      }
+      .fl-2 {
+        bottom: 10%;
+        right: 20%;
+        animation: float 5s ease-in-out infinite reverse;
+        font-size: 60px;
+      }
+      .fl-3 {
+        top: 40%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+        font-size: 30px;
+      }
+      @keyframes float {
         0%,
         100% {
-          box-shadow: 0 4px 15px rgba(27, 94, 32, 0.4);
+          transform: translateY(0) rotate(0deg);
         }
         50% {
-          box-shadow:
-            0 4px 30px rgba(27, 94, 32, 0.7),
-            0 0 20px rgba(200, 169, 96, 0.3);
+          transform: translateY(-15px) rotate(10deg);
         }
       }
 
-      .wheel-footer {
-        text-align: center;
-        margin-top: 16px;
-        flex-shrink: 0;
+      .roulette-container {
+        position: relative;
+        width: 100%;
+        height: 140px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
-      .wheel-hint {
-        font-size: 12px;
-        color: var(--text3);
-        font-weight: 500;
+      .roulette-window {
+        width: 100%;
+        height: 110px;
+        overflow: hidden;
+        mask-image: linear-gradient(
+          90deg,
+          transparent 0%,
+          #000 20%,
+          #000 80%,
+          transparent 100%
+        );
+        -webkit-mask-image: linear-gradient(
+          90deg,
+          transparent 0%,
+          #000 20%,
+          #000 80%,
+          transparent 100%
+        );
+      }
+      .roulette-track {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        width: max-content;
+        gap: 12px;
+        padding: 0 calc(50vw - 45px); /* Центрирует первую карточку */
+      }
+      .r-card {
+        width: 90px;
+        height: 90px;
+        background: var(--ga-card);
+        border-radius: 20px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          inset 0 2px 4px rgba(255, 255, 255, 0.8),
+          inset 0 -4px 6px rgba(0, 0, 0, 0.05),
+          0 10px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transform: scale(0.9);
+        transition:
+          transform 0.2s,
+          background 0.2s;
+        text-align: center;
+        padding: 5px;
+      }
+      .r-card.active {
+        transform: scale(1.1);
+        background: #fff;
+        box-shadow:
+          0 0 0 3px var(--ga-green),
+          0 15px 25px rgba(210, 255, 0, 0.3);
+      }
+      .r-emoji {
+        font-size: 34px;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      }
+      .r-label {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--ga-text);
+        line-height: 1.1;
       }
 
-      /* ── Done Scene ── */
+      .pointer-wrapper {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        z-index: 5;
+      }
+      .pointer-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ga-green);
+        box-shadow: 0 0 8px var(--ga-green);
+      }
+      .pointer-triangle {
+        width: 0;
+        height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-bottom: 18px solid var(--ga-green);
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+      }
+
+      .action-area {
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .ga-btn {
+        width: 100%;
+        max-width: 380px;
+        padding: 18px;
+        background: var(--ga-green);
+        color: var(--ga-text);
+        font-size: 18px;
+        font-weight: 800;
+        border: 4px solid rgba(255, 255, 255, 0.8);
+        border-radius: 40px;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(210, 255, 0, 0.4);
+        transition: transform 0.1s;
+        text-align: center;
+      }
+      .ga-btn:active {
+        transform: scale(0.96);
+      }
+      .ga-btn:disabled {
+        opacity: 0.6;
+        pointer-events: none;
+        filter: grayscale(1);
+        box-shadow: none;
+      }
+      .terms-text {
+        font-size: 11px;
+        color: var(--ga-text-muted);
+        text-align: center;
+        line-height: 1.4;
+      }
+      .terms-text span {
+        color: #9c8a8a;
+      }
+
+      /* ── ОРИГИНАЛЬНЫЙ СТИЛЬ: Done Scene & Timer ── */
       #scene-done {
         align-items: center;
         padding: max(16px, var(--safe-top)) 24px max(24px, var(--safe-bot));
         overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
       }
       .done-wrap {
         width: 100%;
@@ -256,47 +373,23 @@
         display: flex;
         align-items: center;
         justify-content: center;
-      }
-      .done-sticker img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 16px;
+        font-size: 100px;
+        filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
       }
       .done-prize {
         font-size: 22px;
         font-weight: 900;
-        color: var(--green);
+        color: var(--text);
         margin-bottom: 16px;
       }
-      .done-prize .gold {
-        color: var(--gold);
-      }
-
       .timer-card {
         background: var(--white);
         border-radius: 16px;
         padding: 20px;
         margin-bottom: 14px;
-        position: relative;
-        overflow: hidden;
         width: 100%;
-        border: 1px solid var(--bg3);
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-      }
-      .timer-card::before {
-        content: "";
-        position: absolute;
-        top: -40px;
-        right: -40px;
-        width: 120px;
-        height: 120px;
-        background: radial-gradient(
-          circle,
-          rgba(27, 94, 32, 0.06),
-          transparent 70%
-        );
-        border-radius: 50%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #fff;
       }
       .timer-main {
         display: flex;
@@ -306,33 +399,26 @@
         margin-bottom: 12px;
       }
       .timer-time {
-        font-family: "Montserrat", sans-serif;
         font-size: 28px;
         font-weight: 900;
         color: var(--text);
         letter-spacing: 2px;
-        line-height: 1;
-        min-width: 185px;
-        text-align: center;
       }
       .timer-time.done {
-        color: var(--green-ll);
+        color: var(--ga-text);
         font-size: 20px;
         letter-spacing: 0;
-        min-width: auto;
       }
       .timer-pill {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: linear-gradient(135deg, var(--green), var(--green-l));
-        color: #fff;
+        background: var(--ga-text);
+        color: var(--ga-green);
         font-weight: 800;
         padding: 5px 11px;
         border-radius: 20px;
         font-size: 12px;
-        flex-shrink: 0;
-        white-space: nowrap;
       }
       .timer-pill.fast {
         animation: pill-p 1s ease-in-out infinite;
@@ -359,12 +445,11 @@
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--green);
-        animation: dot-b 1.5s ease-in-out infinite;
-        flex-shrink: 0;
+        background: var(--ga-text);
+        animation: dot-b 1.5s infinite;
       }
       .timer-dot.done {
-        background: var(--green-ll);
+        background: var(--ga-green);
         animation: none;
       }
       @keyframes dot-b {
@@ -393,32 +478,29 @@
         font-size: 9px;
         font-weight: 700;
         color: #fff;
-        flex-shrink: 0;
+        background: var(--bg3);
         transition: background 0.3s;
       }
       .tp-dot.done {
-        background: var(--green-ll);
+        background: var(--ga-text);
+        color: var(--ga-green);
       }
       .tp-dot.active {
-        background: linear-gradient(135deg, var(--green), var(--green-l));
-      }
-      .tp-dot.pending {
-        background: #ccc;
+        background: var(--ga-green);
+        color: var(--ga-text);
       }
       .tp-line {
         width: 40px;
         height: 3px;
         border-radius: 2px;
+        background: var(--bg3);
         transition: background 0.3s;
       }
       .tp-line.done {
-        background: var(--green-ll);
+        background: var(--ga-text);
       }
       .tp-line.active {
-        background: linear-gradient(90deg, var(--green), #ccc);
-      }
-      .tp-line.pending {
-        background: var(--bg3);
+        background: linear-gradient(90deg, var(--ga-green), var(--bg3));
       }
       .timer-labels {
         display: flex;
@@ -434,32 +516,31 @@
         width: 60px;
       }
       .tp-label.done-l {
-        color: var(--green-ll);
+        color: var(--ga-text);
       }
       .tp-label.active-l {
-        color: var(--green);
+        color: var(--ga-text);
       }
-
       .done-actions {
         display: flex;
         gap: 10px;
         width: 100%;
       }
 
-      /* ── Buttons ── */
+      /* ── ОРИГИНАЛЬНЫЙ СТИЛЬ: Buttons ── */
       .btn-primary {
         position: relative;
         width: 100%;
         padding: 15px;
         font-size: 16px;
-        font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, var(--green), var(--green-l));
+        font-weight: 800;
+        color: var(--ga-text);
+        background: var(--ga-green);
         border: none;
         border-radius: 14px;
         cursor: pointer;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
+        box-shadow: 0 10px 25px rgba(210, 255, 0, 0.3);
         transition:
           transform 0.1s,
           opacity 0.3s;
@@ -468,46 +549,10 @@
         transform: scale(0.95);
       }
       .btn-primary:disabled {
-        opacity: 0.35;
+        opacity: 0.5;
         pointer-events: none;
         box-shadow: none;
-      }
-      .btn-primary.pulse {
-        animation: btn-glow-g 1.5s ease-in-out infinite;
-      }
-      @keyframes btn-glow-g {
-        0%,
-        100% {
-          box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
-        }
-        50% {
-          box-shadow:
-            0 4px 30px rgba(27, 94, 32, 0.6),
-            0 0 20px rgba(200, 169, 96, 0.3);
-        }
-      }
-      .btn-shine {
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.2),
-          transparent
-        );
-        animation: shine 2.5s ease-in-out infinite;
-      }
-      @keyframes shine {
-        0% {
-          left: -100%;
-        }
-        50%,
-        100% {
-          left: 100%;
-        }
+        filter: grayscale(1);
       }
 
       .btn-action {
@@ -515,38 +560,31 @@
         padding: 13px 8px;
         font-size: 13px;
         font-weight: 700;
-        color: #fff;
+        color: var(--ga-text);
         border: none;
         border-radius: 14px;
         cursor: pointer;
         transition: transform 0.1s;
-        line-height: 1.3;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 4px;
+        background: var(--ga-green);
+        box-shadow: 0 4px 15px rgba(210, 255, 0, 0.25);
       }
       .btn-action:active {
         transform: scale(0.95);
       }
-      .btn-action.green {
-        background: linear-gradient(135deg, var(--green), var(--green-l));
-        box-shadow: 0 4px 15px rgba(27, 94, 32, 0.25);
-      }
       .btn-action.dark {
-        background: linear-gradient(135deg, #555, #333);
+        background: #1a1a1a;
+        color: var(--ga-green);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
       }
       .btn-action-icon {
-        width: 22px;
-        height: 22px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
+        font-size: 20px;
       }
 
-      /* ── Sheets ── */
+      /* ── ОРИГИНАЛЬНЫЙ СТИЛЬ: Sheets ── */
       .sheet-overlay {
         position: fixed;
         inset: 0;
@@ -558,31 +596,31 @@
       .sheet-bg {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.45);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
       }
       .sheet {
         position: relative;
         z-index: 1;
         background: var(--white);
-        border-radius: 20px 20px 0 0;
+        border-radius: 24px 24px 0 0;
         padding: 10px 24px max(34px, var(--safe-bot));
         max-height: 85vh;
         overflow-y: auto;
         text-align: center;
-        -webkit-overflow-scrolling: touch;
       }
       .sheet-handle {
-        width: 36px;
-        height: 4px;
-        border-radius: 2px;
-        background: #ddd;
-        margin: 0 auto 18px;
+        width: 40px;
+        height: 5px;
+        border-radius: 3px;
+        background: #e0e0e0;
+        margin: 0 auto 20px;
       }
       .hidden {
         display: none !important;
       }
 
-      /* ── Prize Sheet ── */
+      /* Prize Sheet */
       .prize-label {
         font-size: 16px;
         color: var(--text2);
@@ -598,27 +636,26 @@
         display: flex;
         align-items: center;
         justify-content: center;
-      }
-      .prize-img-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 12px;
+        background: var(--ga-card);
+        border-radius: 24px;
+        box-shadow: inset 0 -4px 10px rgba(0, 0, 0, 0.05);
       }
       .prize-emoji-big {
         font-size: 80px;
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
       }
       .prize-name {
-        font-size: 20px;
-        font-weight: 800;
-        color: var(--green);
+        font-size: 24px;
+        font-weight: 900;
+        color: var(--ga-text);
         margin-bottom: 6px;
       }
       .prize-brand {
         font-size: 14px;
-        color: var(--gold-d);
+        color: var(--ga-text-muted);
         font-weight: 700;
-        margin-bottom: 14px;
+        margin-bottom: 20px;
+        text-transform: uppercase;
       }
       .prize-cd-wrap {
         height: 60px;
@@ -630,54 +667,48 @@
       #prize-cd {
         font-size: 42px;
         font-weight: 900;
-        color: var(--green);
-        line-height: 1;
+        color: var(--ga-text);
       }
 
-      /* ── Subscribe Sheet ── */
+      /* Subscribe Sheet */
       .sub-sticker {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 50px;
+        font-size: 60px;
+        margin-bottom: 10px;
       }
       .sub-prize {
         font-size: 18px;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 14px;
+        font-weight: 800;
+        margin-bottom: 10px;
       }
       .sub-desc {
         font-size: 14px;
-        color: var(--text2);
-        margin-bottom: 12px;
+        color: #666;
+        margin-bottom: 20px;
         line-height: 1.5;
       }
       .sub-progress {
         font-size: 13px;
-        color: var(--green);
+        color: var(--text);
         font-weight: 700;
         margin-bottom: 12px;
       }
       .sub-list {
         list-style: none;
         margin-bottom: 20px;
+        text-align: left;
       }
       .sub-item {
         display: flex;
         align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--bg2);
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
       }
       .sub-item:last-child {
         border-bottom: none;
       }
       .sub-avatar {
-        width: 42px;
-        height: 42px;
+        width: 46px;
+        height: 46px;
         border-radius: 50%;
         background: var(--bg2);
         margin-right: 12px;
@@ -692,40 +723,39 @@
       .sub-avatar img {
         width: 100%;
         height: 100%;
-        border-radius: 50%;
         object-fit: cover;
       }
       .sub-info {
         flex: 1;
-        text-align: left;
         min-width: 0;
       }
       .sub-name {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 15px;
+        font-weight: 700;
         color: var(--text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
       .sub-btn {
-        padding: 8px 14px;
+        padding: 8px 16px;
         font-size: 13px;
-        font-weight: 600;
-        color: #fff;
-        background: var(--green);
+        font-weight: 800;
+        color: var(--text);
+        background: var(--ga-green);
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         cursor: pointer;
         flex-shrink: 0;
         margin-left: 10px;
       }
       .sub-btn.done {
-        background: var(--green-ll);
+        background: var(--bg2);
+        color: var(--text3);
         pointer-events: none;
       }
 
-      /* ── Speed Sheet ── */
+      /* Speed Sheet (Рефералка) */
       .su-header {
         display: flex;
         align-items: center;
@@ -734,12 +764,6 @@
         margin-bottom: 6px;
       }
       .su-icon {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
         font-size: 22px;
       }
       .su-title {
@@ -775,14 +799,12 @@
         margin-top: 4px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
       }
       .su-divider {
         width: 1px;
         height: 40px;
         background: var(--bg3);
       }
-
       .ref-track {
         position: relative;
         height: 8px;
@@ -795,7 +817,7 @@
         top: 0;
         left: 0;
         height: 100%;
-        background: linear-gradient(90deg, var(--green), var(--green-l));
+        background: var(--ga-text);
         border-radius: 4px;
         transition: width 0.6s;
       }
@@ -811,7 +833,6 @@
         font-size: 9px;
         font-weight: 700;
         color: #fff;
-        flex-shrink: 0;
         background: #d0d0d0;
         border: 3px solid #fff;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
@@ -819,7 +840,8 @@
         z-index: 2;
       }
       .ref-ms.on {
-        background: linear-gradient(135deg, var(--green), var(--green-l));
+        background: var(--ga-text);
+        color: var(--ga-green);
       }
       .ref-ms-info {
         position: absolute;
@@ -841,20 +863,19 @@
       }
       .ref-ms.on .ref-ms-count,
       .ref-ms.on .ref-ms-speed {
-        color: var(--green);
+        color: var(--ga-text);
       }
-
       .btn-share {
         width: 100%;
-        padding: 14px;
-        font-size: 15px;
-        font-weight: 700;
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 800;
         color: #fff;
-        background: linear-gradient(135deg, #0088cc, #0077b5);
+        background: #0088cc;
         border: none;
-        border-radius: 14px;
+        border-radius: 16px;
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 136, 204, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -864,18 +885,8 @@
       .btn-share:active {
         transform: scale(0.95);
       }
-      .btn-share:disabled {
-        opacity: 0.5;
-        pointer-events: none;
-      }
       .share-tgs {
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 16px;
+        font-size: 18px;
       }
       .ref-hint {
         font-size: 12px;
@@ -894,7 +905,7 @@
         padding: 8px;
       }
 
-      /* ── Stars Modal ── */
+      /* Stars Modal (Админка) */
       .modal-fs {
         position: fixed;
         inset: 0;
@@ -942,11 +953,6 @@
         white-space: pre-wrap;
         word-wrap: break-word;
       }
-      .modal-fs-body:empty::after {
-        content: "Загрузка...";
-        color: #ccc;
-      }
-
       .btn-admin-edit {
         position: fixed;
         bottom: 24px;
@@ -954,10 +960,11 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--green), var(--green-l));
+        background: var(--ga-text);
+        color: var(--ga-green);
         border: none;
         font-size: 20px;
-        box-shadow: 0 4px 20px rgba(27, 94, 32, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         cursor: pointer;
         z-index: 215;
         display: flex;
@@ -985,7 +992,7 @@
         color: var(--text);
       }
       .stars-textarea:focus {
-        border-color: var(--green);
+        border-color: var(--ga-text);
       }
       .stars-edit-btns {
         display: flex;
@@ -997,8 +1004,8 @@
         padding: 14px;
         font-size: 15px;
         font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, var(--green-ll), var(--green-l));
+        color: var(--ga-green);
+        background: var(--ga-text);
         border: none;
         border-radius: 12px;
         cursor: pointer;
@@ -1015,7 +1022,7 @@
         cursor: pointer;
       }
 
-      /* ── Effects ── */
+      /* Effects */
       #flash {
         position: fixed;
         inset: 0;
@@ -1033,36 +1040,19 @@
         padding: 12px 24px;
         border-radius: 12px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         z-index: 9999;
         transition: transform 0.3s;
-        pointer-events: none;
-        color: #fff;
+        color: #000;
+        background: var(--ga-green);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
       .toast.error {
-        background: var(--red);
-      }
-      .toast.success {
-        background: var(--green-ll);
+        background: #ff3b30;
+        color: #fff;
       }
       .toast.show {
         transform: translateX(-50%) translateY(0);
-      }
-
-      .confetti-piece {
-        position: fixed;
-        pointer-events: none;
-        z-index: 50;
-        will-change: transform, opacity;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
       }
     </style>
   </head>
@@ -1070,44 +1060,48 @@
     <!-- ═══ LOADING ═══ -->
     <div id="scene-loading" class="scene active">
       <div class="loader"></div>
-      <p class="loader-text">Загрузка...</p>
     </div>
 
-    <!-- ═══ WHEEL ═══ -->
+    <!-- ═══ WHEEL (ЗОЛОТОЕ ЯБЛОКО) ═══ -->
     <div id="scene-wheel" class="scene">
-      <div class="wheel-header">
-        <div class="wheel-logo">ЗОЛОТАЯ <span>РУЛЕТКА</span></div>
-        <div class="wheel-sub">Крутите и выигрывайте!</div>
-        <div class="wheel-attempts" id="wheel-attempts"></div>
-      </div>
-      <div class="wheel-container" id="wheel-container">
-        <div class="wheel-pointer">
-          <svg viewBox="0 0 40 40">
-            <path
-              d="M20 38L8 8h24L20 38z"
-              fill="#C8A960"
-              stroke="#A68B4B"
-              stroke-width="1.5"
-            />
-            <path d="M20 34L11 12h18L20 34z" fill="#D4BA7A" />
-          </svg>
+      <div class="top-toast">🍏 Эксклюзивные подарки уже ждут вас</div>
+      <div class="hero-decor">
+        <div class="floating-item fl-1">💄</div>
+        <div class="floating-item fl-2">🍏</div>
+        <div class="floating-item fl-3">✨</div>
+        <div class="hero-title">
+          каждая уважающая себя<br />девушка/женщина утром:
         </div>
-        <canvas id="wheel-canvas" width="600" height="600"></canvas>
-        <button id="wheel-spin-btn" class="wheel-center-btn pulse">
-          КРУТИТЬ
-        </button>
+        <div class="hero-prize-huge">+КРАСОТА</div>
       </div>
-      <div class="wheel-footer">
-        <div class="wheel-hint">Нажмите кнопку чтобы испытать удачу</div>
+
+      <div class="roulette-container">
+        <div class="roulette-window">
+          <div class="roulette-track" id="roulette-track">
+            <!-- Сюда вставляются карточки -->
+          </div>
+        </div>
+        <div class="pointer-wrapper">
+          <div class="pointer-dot"></div>
+          <div class="pointer-triangle"></div>
+        </div>
+      </div>
+
+      <div class="action-area">
+        <button id="wheel-spin-btn" class="ga-btn">бесплатный старт</button>
+        <div class="terms-text">
+          Нажимая на кнопку, я соглашаюсь<br />с <span>Условиями акции</span>
+        </div>
       </div>
     </div>
 
-    <!-- ═══ DONE ═══ -->
+    <!-- ═══ DONE SCENE (ИЗ ОРИГИНАЛА) ═══ -->
     <div id="scene-done" class="scene">
       <div class="done-wrap">
-        <div class="done-icon" id="done-icon">✅</div>
-        <div class="done-sticker" id="done-sticker"></div>
+        <div class="done-icon" id="done-icon" style="font-size: 30px">✅</div>
+        <div class="done-sticker" id="done-sticker">🎁</div>
         <p class="done-prize" id="done-prize"></p>
+
         <div class="timer-card">
           <div class="timer-main">
             <div class="timer-time" id="timer-time">24:00:00</div>
@@ -1119,6 +1113,7 @@
             <div class="timer-dot" id="timer-dot"></div>
             <span id="timer-text">Подготавливаем приз...</span>
           </div>
+
           <div class="timer-progress">
             <div id="tp1" class="tp-dot done">✓</div>
             <div id="tl1" class="tp-line done"></div>
@@ -1132,59 +1127,56 @@
             <div id="tlbl3" class="tp-label">Выдача</div>
           </div>
         </div>
+
         <div id="done-actions-timer" class="done-actions">
-          <button id="btn-speedup" class="btn-action green">
+          <button id="btn-speedup" class="btn-action">
             <span class="btn-action-icon">🚀</span><span>Ускорить</span>
           </button>
           <button id="btn-earn-stars" class="btn-action dark">
-            <span class="btn-action-icon">⭐</span><span>Заработать</span>
+            <span class="btn-action-icon">⭐</span><span>Правила</span>
           </button>
         </div>
         <div id="done-actions-final" class="done-actions hidden">
-          <button id="btn-finalize" class="btn-primary pulse">
-            <span>🎁 Получить приз</span><span class="btn-shine"></span>
+          <button id="btn-finalize" class="btn-primary">
+            <span>🎁 Получить приз</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ═══ Prize Sheet ═══ -->
+    <!-- ═══ PRIZE SHEET ═══ -->
     <div id="sheet-prize" class="sheet-overlay hidden">
       <div class="sheet-bg"></div>
       <div class="sheet">
         <div class="sheet-handle"></div>
         <div class="prize-label">ВАМ ВЫПАЛО:</div>
-        <div class="prize-img-wrap" id="prize-img-wrap">
+        <div class="prize-img-wrap">
           <div class="prize-emoji-big" id="prize-emoji">🎁</div>
         </div>
         <p class="prize-name" id="prize-name"></p>
         <p class="prize-brand" id="prize-brand"></p>
         <div class="prize-cd-wrap"><div id="prize-cd"></div></div>
-        <button id="btn-claim" class="btn-primary" disabled>
-          <span>ЗАБРАТЬ</span><span class="btn-shine"></span>
-        </button>
+        <button id="btn-claim" class="btn-primary" disabled>ЗАБРАТЬ</button>
       </div>
     </div>
 
-    <!-- ═══ Subscribe Sheet ═══ -->
+    <!-- ═══ SUBSCRIBE SHEET ═══ -->
     <div id="sheet-sub" class="sheet-overlay hidden">
       <div class="sheet-bg"></div>
       <div class="sheet">
         <div class="sheet-handle"></div>
-        <div class="sub-sticker" id="sub-sticker">🎁</div>
+        <div class="sub-sticker">🎁</div>
         <p class="sub-prize" id="sub-prize"></p>
-        <p class="sub-desc">
-          Чтобы получить приз, подпишитесь на&nbsp;наших спонсоров:
-        </p>
+        <p class="sub-desc">Чтобы забрать приз, подпишитесь на спонсоров:</p>
         <div class="sub-progress" id="sub-progress"></div>
         <ul class="sub-list" id="sub-list"></ul>
         <button id="btn-check-sub" class="btn-primary">
-          <span>Проверить подписку</span><span class="btn-shine"></span>
+          Проверить подписку
         </button>
       </div>
     </div>
 
-    <!-- ═══ Speed Sheet ═══ -->
+    <!-- ═══ SPEED SHEET (Рефералка) ═══ -->
     <div id="sheet-speed" class="sheet-overlay hidden">
       <div class="sheet-bg"></div>
       <div class="sheet">
@@ -1196,6 +1188,7 @@
         <p class="su-desc">
           Пригласи друзей — каждые 2 друга ускоряют таймер вдвое!
         </p>
+
         <div class="su-stats">
           <div style="text-align: center">
             <div class="su-stat-val" id="su-refs">0</div>
@@ -1207,6 +1200,7 @@
             <div class="su-stat-label">Скорость</div>
           </div>
         </div>
+
         <div style="margin-bottom: 20px">
           <div class="ref-track">
             <div class="ref-fill" id="ref-fill" style="width: 0"></div>
@@ -1236,6 +1230,7 @@
             </div>
           </div>
         </div>
+
         <button id="btn-share" class="btn-share">
           <span class="share-tgs">✈️</span
           ><span id="btn-share-text">Пригласить друга</span>
@@ -1247,17 +1242,11 @@
       </div>
     </div>
 
-    <!-- ═══ Stars Modal ═══ -->
+    <!-- ═══ STARS MODAL (Админка) ═══ -->
     <div id="modal-stars" class="modal-fs hidden">
       <div class="modal-fs-header">
-        <span class="modal-fs-title">⭐ Заработать звёзды</span>
-        <button
-          id="btn-close-stars"
-          class="modal-fs-close"
-          aria-label="Закрыть"
-        >
-          ✕
-        </button>
+        <span class="modal-fs-title">⭐ Правила акции</span>
+        <button id="btn-close-stars" class="modal-fs-close">✕</button>
       </div>
       <div id="stars-content" class="modal-fs-body"></div>
       <div id="stars-edit" class="stars-edit-wrap hidden">
@@ -1281,6 +1270,7 @@
       defer
       src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
     ></script>
+
     <script>
       window.addEventListener("load", () => {
         const ck = setInterval(() => {
@@ -1295,64 +1285,16 @@
         const BOT = "premkarobot";
         const T_SEC = 86400;
 
-        /* ═══ 8 PRIZE SECTORS ═══ */
+        /* Призы (Сектора) */
         const SECTORS = [
-          {
-            label: "Dior\nSauvage",
-            emoji: "🖤",
-            brand: "Dior",
-            color: "#1B5E20",
-            text: "#fff",
-          },
-          {
-            label: "Палетка\nCharlotte\nTilbury",
-            emoji: "🌸",
-            brand: "Charlotte Tilbury",
-            color: "#C8A960",
-            text: "#1a1a1a",
-          },
-          {
-            label: "MAC\nRuby Woo",
-            emoji: "💄",
-            brand: "MAC",
-            color: "#fff",
-            text: "#1a1a1a",
-          },
-          {
-            label: "Dyson\nAirwrap",
-            emoji: "✨",
-            brand: "Dyson",
-            color: "#1B5E20",
-            text: "#fff",
-          },
-          {
-            label: "YSL Libre\nParfum",
-            emoji: "🌹",
-            brand: "Yves Saint Laurent",
-            color: "#C8A960",
-            text: "#1a1a1a",
-          },
-          {
-            label: "La Mer\nКрем",
-            emoji: "💎",
-            brand: "La Mer",
-            color: "#fff",
-            text: "#1a1a1a",
-          },
-          {
-            label: "Sol de\nJaneiro Set",
-            emoji: "🍊",
-            brand: "Sol de Janeiro",
-            color: "#1B5E20",
-            text: "#fff",
-          },
-          {
-            label: "Набор\n50 000 ₽",
-            emoji: "⭐",
-            brand: "Золотая Рулетка",
-            color: "#C8A960",
-            text: "#1a1a1a",
-          },
+          { label: "Dior", emoji: "🖤", brand: "Sauvage" },
+          { label: "Charlotte", emoji: "🌸", brand: "Палетка" },
+          { label: "MAC", emoji: "💄", brand: "Ruby Woo" },
+          { label: "Dyson", emoji: "✨", brand: "Airwrap" },
+          { label: "YSL", emoji: "🌹", brand: "Libre" },
+          { label: "La Mer", emoji: "💎", brand: "Крем" },
+          { label: "Sol de Jan", emoji: "🍊", brand: "Set" },
+          { label: "50 000 ₽", emoji: "🍏", brand: "Бонусы" },
         ];
 
         let CHANNELS = [],
@@ -1364,7 +1306,6 @@
           tSpeed = 1,
           tInt = null;
         let wonPrize = null,
-          wonSector = 0,
           appState = "loading";
         let isChecking = false,
           isSharing = false;
@@ -1381,6 +1322,7 @@
             Telegram.WebApp.HapticFeedback.notificationOccurred(t);
           } catch (e) {}
         };
+
         function calcSpeed(r) {
           return r >= 2 ? Math.pow(2, Math.floor(r / 2)) : 1;
         }
@@ -1416,8 +1358,7 @@
           });
           const el = $("scene-" + id);
           if (instant) {
-            el.classList.add("instant");
-            el.classList.add("active");
+            el.classList.add("instant", "active");
             void el.offsetHeight;
             el.classList.remove("instant");
           } else el.classList.add("active");
@@ -1438,6 +1379,7 @@
           }
           updateBackBtn();
         }
+
         function closeSheet(id, cb) {
           const ov = $(id),
             bg = ov.querySelector(".sheet-bg"),
@@ -1458,6 +1400,7 @@
             if (cb) cb();
           }
         }
+
         function updateBackBtn() {
           try {
             const stars = !$("modal-stars").classList.contains("hidden");
@@ -1466,6 +1409,7 @@
             else Telegram.WebApp.BackButton.hide();
           } catch (e) {}
         }
+
         try {
           Telegram.WebApp.BackButton.onClick(() => {
             if (!$("modal-stars").classList.contains("hidden"))
@@ -1474,13 +1418,6 @@
               closeSheet("sheet-speed");
           });
         } catch (e) {}
-
-        window.addEventListener("offline", () =>
-          toast("Нет интернета", "error", 5000),
-        );
-        window.addEventListener("online", () =>
-          toast("Соединение восстановлено", "success"),
-        );
 
         function gID() {
           try {
@@ -1500,211 +1437,104 @@
               if (!r.ok) {
                 if (r.status >= 400 && r.status < 500 && r.status !== 429)
                   return { ok: false };
-                if (i < 2) {
-                  await sleep(1000 * (i + 1));
-                  continue;
-                }
-                return { ok: false };
-              }
-              return await r.json();
-            } catch (e) {
-              if (i < 2) {
                 await sleep(1000 * (i + 1));
                 continue;
               }
-              return { ok: false, error: "network" };
+              return await r.json();
+            } catch (e) {
+              await sleep(1000 * (i + 1));
             }
           }
           return { ok: false };
         }
 
-        /* ═══════════ WHEEL DRAWING ═══════════ */
-        const wCvs = $("wheel-canvas"),
-          wCtx = wCvs.getContext("2d");
-        let wheelSize = 300,
-          currentRotation = 0,
-          isSpinning = false;
+        /* ═══════════ НОВАЯ ЛОГИКА РУЛЕТКИ (ЗОЛОТОЕ ЯБЛОКО) ═══════════ */
+        const track = $("roulette-track");
+        const CARD_WIDTH = 90;
+        const CARD_GAP = 12;
+        const ITEM_SIZE = CARD_WIDTH + CARD_GAP;
+        let generatedCards = [];
+        let isSpinning = false;
 
-        function setupWheel() {
-          const container = $("wheel-container");
-          const maxW = Math.min(
-            window.innerWidth - 48,
-            window.innerHeight - 260,
-          );
-          wheelSize = Math.min(Math.max(Math.floor(maxW), 220), 380);
-          const dpr = Math.min(window.devicePixelRatio || 1, 2);
-          wCvs.width = wheelSize * dpr;
-          wCvs.height = wheelSize * dpr;
-          wCvs.style.width = wheelSize + "px";
-          wCvs.style.height = wheelSize + "px";
-          wCtx.setTransform(1, 0, 0, 1, 0, 0);
-          wCtx.scale(dpr, dpr);
-
-          const spinBtn = $("wheel-spin-btn");
-          const btnSize = Math.round(wheelSize * 0.22);
-          spinBtn.style.width = btnSize + "px";
-          spinBtn.style.height = btnSize + "px";
-          spinBtn.style.fontSize = Math.round(btnSize * 0.16) + "px";
-
-          drawWheel(currentRotation);
+        function setupRoulette() {
+          track.innerHTML = "";
+          generatedCards = [];
+          const totalCards = 60; // Длинный трек для красивого вращения
+          for (let i = 0; i < totalCards; i++) {
+            const sector = SECTORS[i % SECTORS.length];
+            const div = document.createElement("div");
+            div.className = "r-card";
+            div.innerHTML = `<div class="r-emoji">${sector.emoji}</div><div class="r-label">${sector.label}</div>`;
+            track.appendChild(div);
+            generatedCards.push({ el: div, sector });
+          }
+          gsap.set(track, { x: 0 });
+          updateCardFocus(0);
         }
 
-        function drawWheel(rotation) {
-          const cx = wheelSize / 2,
-            cy = wheelSize / 2,
-            R = wheelSize / 2 - 4;
-          const n = SECTORS.length,
-            arc = (Math.PI * 2) / n;
-          wCtx.clearRect(0, 0, wheelSize, wheelSize);
-          wCtx.save();
-          wCtx.translate(cx, cy);
-          wCtx.rotate(rotation);
-
-          for (let i = 0; i < n; i++) {
-            const a = arc * i - Math.PI / 2;
-            wCtx.beginPath();
-            wCtx.moveTo(0, 0);
-            wCtx.arc(0, 0, R, a, a + arc);
-            wCtx.closePath();
-            wCtx.fillStyle = SECTORS[i].color;
-            wCtx.fill();
-            wCtx.strokeStyle = "rgba(0,0,0,.08)";
-            wCtx.lineWidth = 1.5;
-            wCtx.stroke();
-
-            // Sector border (gold inner lines)
-            wCtx.beginPath();
-            wCtx.moveTo(0, 0);
-            const ex = Math.cos(a) * R,
-              ey = Math.sin(a) * R;
-            wCtx.lineTo(ex, ey);
-            wCtx.strokeStyle = "rgba(200,169,96,.3)";
-            wCtx.lineWidth = 1;
-            wCtx.stroke();
-
-            // Text
-            wCtx.save();
-            wCtx.rotate(a + arc / 2);
-            const textR = R * 0.62;
-            wCtx.translate(textR, 0);
-            wCtx.rotate(Math.PI / 2);
-
-            // Emoji
-            wCtx.font = `${Math.round(wheelSize * 0.055)}px serif`;
-            wCtx.textAlign = "center";
-            wCtx.textBaseline = "middle";
-            wCtx.fillText(SECTORS[i].emoji, 0, -wheelSize * 0.08);
-
-            // Label (multiline)
-            wCtx.fillStyle = SECTORS[i].text;
-            wCtx.font = `700 ${Math.round(wheelSize * 0.032)}px Montserrat,sans-serif`;
-            const lines = SECTORS[i].label.split("\n");
-            const lh = wheelSize * 0.04;
-            const startY = (-lh * (lines.length - 1)) / 2 + wheelSize * 0.02;
-            lines.forEach((line, li) => {
-              wCtx.fillText(line, 0, startY + li * lh);
-            });
-
-            wCtx.restore();
-          }
-
-          // Inner ring
-          wCtx.beginPath();
-          wCtx.arc(0, 0, wheelSize * 0.18, 0, Math.PI * 2);
-          wCtx.fillStyle = "var(--bg)";
-          wCtx.fill();
-          wCtx.strokeStyle = "#C8A960";
-          wCtx.lineWidth = 3;
-          wCtx.stroke();
-
-          wCtx.restore();
-
-          // Outer ring
-          wCtx.beginPath();
-          wCtx.arc(cx, cy, R, 0, Math.PI * 2);
-          wCtx.strokeStyle = "#1B5E20";
-          wCtx.lineWidth = 5;
-          wCtx.stroke();
-          wCtx.beginPath();
-          wCtx.arc(cx, cy, R + 3, 0, Math.PI * 2);
-          wCtx.strokeStyle = "#C8A960";
-          wCtx.lineWidth = 2;
-          wCtx.stroke();
-
-          // Dots on outer ring
-          for (let i = 0; i < n; i++) {
-            const a = rotation + arc * i - Math.PI / 2;
-            const dx = cx + Math.cos(a) * (R - 6),
-              dy = cy + Math.sin(a) * (R - 6);
-            wCtx.beginPath();
-            wCtx.arc(dx, dy, 3, 0, Math.PI * 2);
-            wCtx.fillStyle = "#C8A960";
-            wCtx.fill();
-          }
+        function updateCardFocus(currentX) {
+          const centerIndex = Math.round(Math.abs(currentX) / ITEM_SIZE);
+          generatedCards.forEach((c, i) => {
+            if (i === centerIndex) c.el.classList.add("active");
+            else c.el.classList.remove("active");
+          });
         }
 
-        /* ═══════════ SPIN ANIMATION ═══════════ */
-        async function spinWheel(targetSector) {
+        async function spinRoulette(targetPrizeName) {
           if (isSpinning) return;
           isSpinning = true;
+
           const btn = $("wheel-spin-btn");
           btn.disabled = true;
-          btn.classList.remove("pulse");
-          wCvs.classList.add("spinning");
+          btn.textContent = "Крутим...";
 
-          const n = SECTORS.length;
-          const arc = (Math.PI * 2) / n;
+          // Ищем индекс приза. Берем 48+ для долгого вращения
+          const baseIndex = SECTORS.findIndex(
+            (s) =>
+              targetPrizeName.includes(s.label) ||
+              targetPrizeName.includes(s.brand),
+          );
+          const targetIndex = 48 + (baseIndex >= 0 ? baseIndex : 0);
+          const targetX = -(targetIndex * ITEM_SIZE);
 
-          // Target angle: pointer is at top (−π/2), so sector center = −arc*target − arc/2
-          // We spin multiple full rotations + land on the sector
-          const fullSpins = 5 + Math.floor(Math.random() * 3); // 5-7 full rotations
-          const targetAngle = -(arc * targetSector + arc / 2);
-          // Normalize so it lands on the sector with some randomness within it
-          const jitter = (Math.random() - 0.5) * arc * 0.6;
-          const endRotation =
-            fullSpins * Math.PI * 2 + (-targetAngle + Math.PI / 2) + jitter;
-
-          const startRot = currentRotation;
-          const totalRot = endRotation - (startRot % (Math.PI * 2));
-
-          let lastSector = -1;
-
+          let lastTick = 0;
           await new Promise((resolve) => {
-            const obj = { r: startRot };
-            gsap.to(obj, {
-              r: startRot + totalRot,
-              duration: 4 + Math.random(),
-              ease: "power4.out",
-              onUpdate() {
-                currentRotation = obj.r;
-                drawWheel(currentRotation);
-
-                // Tick haptic when passing sector boundary
-                const normR =
-                  ((currentRotation % (Math.PI * 2)) + Math.PI * 2) %
-                  (Math.PI * 2);
-                const curSec = Math.floor(normR / arc) % n;
-                if (curSec !== lastSector) {
-                  lastSector = curSec;
-                  haptic("light");
+            gsap.to(track, {
+              x: targetX,
+              duration: 6,
+              ease: "power4.out", // Медленное затухание в конце
+              onUpdate: function () {
+                const currentX = this.targets()[0]._gsap.x;
+                updateCardFocus(currentX);
+                const currentTick = Math.round(Math.abs(currentX) / ITEM_SIZE);
+                if (currentTick !== lastTick) {
+                  haptic("light"); // Тик при смене карточки
+                  lastTick = currentTick;
                 }
               },
               onComplete: resolve,
             });
           });
 
-          wCvs.classList.remove("spinning");
           isSpinning = false;
-
-          // Celebration
           haptic("heavy");
           hapticNotif("success");
-          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
 
-          await sleep(600);
+          const flash = $("flash");
+          flash.style.opacity = "1";
+          setTimeout(() => (flash.style.opacity = "0"), 150);
+
+          confetti({
+            particleCount: 100,
+            spread: 80,
+            origin: { y: 0.5 },
+            colors: ["#d2ff00", "#ffffff", "#cccccc"],
+          });
+
+          await sleep(1000);
+          showPrizeSheet(targetIndex);
         }
 
-        /* ═══════════ SPIN BUTTON ═══════════ */
         $("wheel-spin-btn").addEventListener("click", async () => {
           if (appState !== "wheel" || isSpinning) return;
           appState = "spinning";
@@ -1721,35 +1551,23 @@
             $("wheel-spin-btn").disabled = false;
             return;
           }
-
           wonPrize = res.prize;
-          // Find sector index by prize key
-          wonSector = SECTORS.findIndex((s) =>
-            s.label.includes(wonPrize.name.split(" ")[0]),
-          );
-          if (wonSector < 0)
-            wonSector = Math.floor(Math.random() * SECTORS.length);
-
-          await spinWheel(wonSector);
-          await showPrizeSheet();
+          await spinRoulette(wonPrize.name);
         });
 
-        /* ═══════════ PRIZE SHEET ═══════════ */
-        async function showPrizeSheet() {
-          const sector = SECTORS[wonSector];
-          $("prize-emoji").textContent = sector.emoji;
+        /* ═══════════ ОРИГИНАЛЬНАЯ ЛОГИКА ШТОРОК И ТАЙМЕРОВ ═══════════ */
+        async function showPrizeSheet(winIndex) {
+          const s = generatedCards[winIndex].sector;
+          $("prize-emoji").textContent = s.emoji;
           $("prize-name").textContent = wonPrize.name;
-          $("prize-brand").textContent = sector.brand;
+          $("prize-brand").textContent = s.brand;
           $("btn-claim").disabled = true;
-          $("btn-claim").classList.remove("pulse");
           $("prize-cd").textContent = "";
 
           openSheet("sheet-prize");
 
-          // Countdown
           for (let i = 3; i >= 1; i--) {
             $("prize-cd").textContent = i;
-            $("prize-cd").style.color = "var(--green)";
             gsap.fromTo(
               $("prize-cd"),
               { scale: 1.4, opacity: 0 },
@@ -1759,24 +1577,18 @@
             await sleep(1000);
           }
           $("prize-cd").textContent = "ГОТОВО!";
-          $("prize-cd").style.color = "var(--green-ll)";
           gsap.fromTo(
             $("prize-cd"),
             { scale: 1.4, opacity: 0 },
             { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" },
           );
           hapticNotif("success");
-          confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
           await sleep(800);
-
           $("btn-claim").disabled = false;
-          $("btn-claim").classList.add("pulse");
           appState = "prize";
         }
 
-        /* ═══════════ CLAIM → SUB ═══════════ */
         $("btn-claim").addEventListener("click", () => {
-          $("btn-claim").classList.remove("pulse");
           closeSheet("sheet-prize", showSub);
         });
 
@@ -1785,9 +1597,11 @@
           $("sub-progress").textContent =
             `Подписано ${d} из ${CHANNELS.length}`;
         }
+
         function showSub() {
-          const pName = wonPrize ? wonPrize.name : US?.prize_name || "Приз";
-          $("sub-prize").textContent = pName;
+          $("sub-prize").textContent = wonPrize
+            ? wonPrize.name
+            : US?.prize_name || "Приз";
           const list = $("sub-list");
           list.innerHTML = "";
           CHANNELS.forEach((ch) => {
@@ -1806,19 +1620,21 @@
               };
               av.appendChild(img);
             } else av.textContent = isBot ? "🤖" : "📢";
+
             const info = document.createElement("div");
             info.className = "sub-info";
             const nm = document.createElement("div");
             nm.className = "sub-name";
             nm.textContent = ch.name;
             info.appendChild(nm);
+
             const btn = document.createElement("button");
             btn.className = "sub-btn";
             btn.textContent = isBot ? "Открыть" : "Подписаться";
             btn.addEventListener("click", (e) => {
               e.stopPropagation();
               try {
-                if (ch.link && ch.link.includes("t.me/"))
+                if (ch.link.includes("t.me/"))
                   Telegram.WebApp.openTelegramLink(ch.link);
                 else Telegram.WebApp.openLink(ch.link);
               } catch (err) {
@@ -1832,7 +1648,7 @@
                 api("process-action", {
                   action: "mark_bot_opened",
                   bot_id: ch.id,
-                }).catch(() => {});
+                });
               }
             });
             li.append(av, info, btn);
@@ -1848,7 +1664,7 @@
           isChecking = true;
           const btn = $("btn-check-sub");
           btn.disabled = true;
-          btn.querySelector("span").textContent = "Проверяем...";
+          btn.textContent = "Проверяем...";
           try {
             const res = await api("process-action", {
               action: "check_subscriptions",
@@ -1862,8 +1678,7 @@
               toast("Подписки подтверждены!", "success");
               refCount = res.referral_count || 0;
               tSpeed = calcSpeed(refCount);
-              if (res.claimed_at) claimedAt = res.claimed_at;
-              else claimedAt = Date.now() / 1000;
+              claimedAt = res.claimed_at || Date.now() / 1000;
               await sleep(800);
               closeSheet("sheet-sub", goToDone);
             } else if (res.ok) {
@@ -1871,12 +1686,12 @@
               CHANNELS.forEach((ch, i) => {
                 const b = items[i]?.querySelector(".sub-btn");
                 if (b) {
-                  const isB = ch.type === "bot";
                   if (res.results?.[String(ch.id)]) {
                     b.textContent = "✓";
                     b.classList.add("done");
                   } else {
-                    b.textContent = isB ? "Открыть" : "Подписаться";
+                    b.textContent =
+                      ch.type === "bot" ? "Открыть" : "Подписаться";
                     b.classList.remove("done");
                   }
                 }
@@ -1885,16 +1700,13 @@
               toast("Подпишитесь на все каналы!");
               hapticNotif("error");
             } else toast("Ошибка, попробуйте позже");
-          } catch (e) {
-            toast("Ошибка, попробуйте позже");
           } finally {
             btn.disabled = false;
-            btn.querySelector("span").textContent = "Проверить подписку";
+            btn.textContent = "Проверить подписку";
             isChecking = false;
           }
         });
 
-        /* ═══════════ DONE SCENE ═══════════ */
         function resetTimerDots() {
           $("tp2").className = "tp-dot active";
           $("tp2").textContent = "2";
@@ -1906,29 +1718,29 @@
           $("tlbl3").className = "tp-label";
           $("tlbl3").textContent = "Выдача";
         }
+
         function goToDone() {
           const pName = wonPrize ? wonPrize.name : US?.prize_name || "Приз";
           $("done-prize").textContent = pName;
-          const si = SECTORS.findIndex((s) =>
-            s.label.includes(pName.split(" ")[0]),
+          const si = SECTORS.findIndex(
+            (s) => pName.includes(s.label) || pName.includes(s.brand),
           );
-          const sector = si >= 0 ? SECTORS[si] : SECTORS[0];
-          $("done-sticker").innerHTML =
-            `<div style="font-size:80px">${sector.emoji}</div>`;
+          $("done-sticker").textContent = si >= 0 ? SECTORS[si].emoji : "🎁";
+
           if (!claimedAt) claimedAt = US?.claimed_at || Date.now() / 1000;
           refCount = US?.referral_count || refCount || 0;
           tSpeed = calcSpeed(refCount);
+
           $("done-actions-timer").classList.remove("hidden");
           $("done-actions-final").classList.add("hidden");
           resetTimerDots();
           startTimer();
           showScene("done");
-          confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } });
-          gsap.from(".done-wrap", {
-            y: 40,
-            opacity: 0,
-            duration: 0.5,
-            ease: "back.out(1.5)",
+          confetti({
+            particleCount: 100,
+            spread: 100,
+            origin: { y: 0.5 },
+            colors: ["#d2ff00", "#ffffff"],
           });
           appState = "final";
         }
@@ -1938,6 +1750,7 @@
           updTimer();
           tInt = setInterval(updTimer, 500);
         }
+
         function updTimer() {
           if (!claimedAt) return;
           const rem = Math.max(
@@ -1957,45 +1770,34 @@
               : pill.classList.remove("fast");
           }
           if (!t) {
-            if (te) {
-              te.textContent = "Готово!";
-              te.classList.add("done");
-            }
-            if (dot) dot.classList.add("done");
-            if (st) st.textContent = "Приз готов к выдаче!";
+            te.textContent = "Готово!";
+            te.classList.add("done");
+            dot.classList.add("done");
+            st.textContent = "Приз готов к выдаче!";
             [$("tp2"), $("tp3")].forEach((el) => {
-              if (el) {
-                el.className = "tp-dot done";
-                el.textContent = "✓";
-              }
+              el.className = "tp-dot done";
+              el.textContent = "✓";
             });
-            if ($("tl2")) $("tl2").className = "tp-line done";
-            if ($("tlbl2")) {
-              $("tlbl2").className = "tp-label done-l";
-              $("tlbl2").textContent = "Готово";
-            }
-            if ($("tlbl3")) {
-              $("tlbl3").className = "tp-label done-l";
-              $("tlbl3").textContent = "Выдан";
-            }
-            if (pill) pill.style.display = "none";
+            $("tl2").className = "tp-line done";
+            $("tlbl2").className = "tp-label done-l";
+            $("tlbl2").textContent = "Готово";
+            $("tlbl3").className = "tp-label done-l";
+            $("tlbl3").textContent = "Выдан";
+            pill.style.display = "none";
             $("done-actions-timer").classList.add("hidden");
             $("done-actions-final").classList.remove("hidden");
             clearInterval(tInt);
             return;
           }
-          if (te) {
-            te.textContent = t;
-            te.classList.remove("done");
-          }
-          if (dot) dot.classList.remove("done");
-          if (st) st.textContent = "Подготавливаем приз...";
+          te.textContent = t;
+          te.classList.remove("done");
+          dot.classList.remove("done");
+          st.textContent = "Подготавливаем приз...";
         }
 
         $("btn-finalize").addEventListener("click", async () => {
           const btn = $("btn-finalize");
           btn.disabled = true;
-          btn.classList.remove("pulse");
           btn.querySelector("span").textContent = "Обработка...";
           const res = await api("process-action", { action: "finalize_claim" });
           if (res.ok) {
@@ -2006,12 +1808,11 @@
           } else {
             toast(res.error || "Ошибка", "error");
             btn.disabled = false;
-            btn.classList.add("pulse");
             btn.querySelector("span").textContent = "🎁 Получить приз";
           }
         });
 
-        /* ═══════════ SPEED / SHARE ═══════════ */
+        /* ═══════════ ОРИГИНАЛЬНАЯ ЛОГИКА: SPEED / SHARE ═══════════ */
         $("btn-speedup").addEventListener("click", () => {
           $("su-refs").textContent = refCount;
           $("su-speed").textContent = "x" + tSpeed;
@@ -2062,11 +1863,12 @@
             isSharing = false;
           }
         });
+
         function shareFallback() {
           const uid = US?.telegram_id || "";
           const link = `https://t.me/${BOT}?start=ref_${uid}`;
           const text =
-            "🎁 Крути рулетку и выиграй подарок!\n\n💄 Dior, MAC, Dyson, La Mer\n✨ Это бесплатно! Жми 👇";
+            "🍏 Крути рулетку Золотого Яблока и выиграй подарок!\n\n💄 Dior, MAC, Dyson\n✨ Это бесплатно! Жми 👇";
           const shareUrl =
             "https://t.me/share/url?url=" +
             encodeURIComponent(link) +
@@ -2079,7 +1881,7 @@
           }
         }
 
-        /* ═══════════ EARN STARS ═══════════ */
+        /* ═══════════ ОРИГИНАЛЬНАЯ ЛОГИКА: ADMIN / STARS ═══════════ */
         $("btn-earn-stars").addEventListener("click", async () => {
           $("modal-stars").classList.remove("hidden");
           updateBackBtn();
@@ -2123,22 +1925,13 @@
           $("stars-content").classList.remove("hidden");
         });
 
-        /* ═══════════ RESIZE ═══════════ */
-        let resizeTimer;
-        window.addEventListener("resize", () => {
-          clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(() => {
-            if (appState === "wheel") setupWheel();
-          }, 200);
-        });
-
         /* ═══════════ INIT ═══════════ */
         async function init() {
           try {
             Telegram.WebApp.expand();
             Telegram.WebApp.disableVerticalSwipes();
-            Telegram.WebApp.setHeaderColor("#f5f5f0");
-            Telegram.WebApp.setBackgroundColor("#f5f5f0");
+            Telegram.WebApp.setHeaderColor("#eceef1"); // Цвет фона ЗЯ
+            Telegram.WebApp.setBackgroundColor("#d5d8df");
           } catch (e) {}
 
           try {
@@ -2164,15 +1957,17 @@
             return;
           }
 
+          setupRoulette();
+
           if (US.state === "completed") {
             showScene("done", true);
             $("done-prize").textContent = US.prize_name || "Приз";
-            const si = SECTORS.findIndex((s) =>
-              s.label.includes((US.prize_name || "").split(" ")[0]),
+            const si = SECTORS.findIndex(
+              (s) =>
+                (US.prize_name || "").includes(s.label) ||
+                (US.prize_name || "").includes(s.brand),
             );
-            const sector = si >= 0 ? SECTORS[si] : SECTORS[0];
-            $("done-sticker").innerHTML =
-              `<div style="font-size:80px">${sector.emoji}</div>`;
+            $("done-sticker").textContent = si >= 0 ? SECTORS[si].emoji : "🎁";
             $("timer-time").textContent = "Получено!";
             $("timer-time").classList.add("done");
             $("timer-dot").classList.add("done");
@@ -2194,17 +1989,11 @@
             $("done-actions-timer").classList.add("hidden");
             $("done-actions-final").classList.remove("hidden");
             $("btn-finalize").disabled = true;
-            $("btn-finalize").classList.remove("pulse");
             $("btn-finalize").querySelector("span").textContent = "✅ Получено";
-            gsap.from(".done-wrap", {
-              y: 30,
-              opacity: 0,
-              duration: 0.5,
-              delay: 0.1,
-            });
             appState = "final";
             return;
           }
+
           if (US.state === "claimed") {
             wonPrize = {
               key: US.prize_key || "stars",
@@ -2213,15 +2002,14 @@
             goToDone();
             return;
           }
+
           if (US.state === "rolled") {
             wonPrize = {
               key: US.prize_key || "stars",
               name: US.prize_name || "Приз",
             };
             showScene("wheel", true);
-            setupWheel();
             $("wheel-spin-btn").disabled = true;
-            $("wheel-spin-btn").classList.remove("pulse");
             $("wheel-spin-btn").textContent = "—";
             await sleep(200);
             showSub();
@@ -2229,25 +2017,7 @@
           }
 
           showScene("wheel", true);
-          await new Promise((r) =>
-            requestAnimationFrame(() => requestAnimationFrame(r)),
-          );
-          setupWheel();
           appState = "wheel";
-          gsap.from(".wheel-header", { y: 20, opacity: 0, duration: 0.4 });
-          gsap.from(".wheel-container", {
-            scale: 0.8,
-            opacity: 0,
-            duration: 0.6,
-            delay: 0.15,
-            ease: "back.out(1.5)",
-          });
-          gsap.from(".wheel-footer", {
-            y: 20,
-            opacity: 0,
-            duration: 0.3,
-            delay: 0.3,
-          });
         }
         init();
       }
