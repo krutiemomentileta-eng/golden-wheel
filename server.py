@@ -61,7 +61,8 @@ SUPABASE_URL    = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY    = os.getenv("SUPABASE_KEY", "")
 INVITE_PHOTO_ID = os.getenv("INVITE_PHOTO_ID", "")
 
-APP_VERSION = "1"
+import time
+APP_VERSION = str(int(time.time()))
 
 GAME_CONFIG = {
     "timer_seconds": 86400,
@@ -1655,17 +1656,25 @@ if os.path.isdir("public/assets"):
     app.mount("/assets", StaticFiles(directory="public/assets"), name="assets")
 
 
+NO_CACHE_HEADERS = {
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+    "Pragma": "no-cache",
+    "Expires": "0",
+}
+
 @app.get("/")
 async def root():
-    return FileResponse("public/index.html")
-
+    return FileResponse("public/index.html", headers=NO_CACHE_HEADERS)
 
 @app.get("/{path:path}")
 async def catch_all(path: str):
     fp = f"public/{path}"
     if os.path.isfile(fp):
-        return FileResponse(fp)
-    return FileResponse("public/index.html")
+        # Если это картинка или TGS, пусть кэшируется (чтобы не тормозило)
+        if fp.endswith((".png", ".jpg", ".tgs", ".js")):
+            return FileResponse(fp)
+        return FileResponse(fp, headers=NO_CACHE_HEADERS)
+    return FileResponse("public/index.html", headers=NO_CACHE_HEADERS)
 
 
 # ╔═══════════════════════════════════════╗
