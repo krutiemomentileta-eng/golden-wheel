@@ -6,65 +6,62 @@
       name="viewport"
       content="width=device-width,initial-scale=1.0,user-scalable=no"
     />
-    <title>🍏 Рулетка Золотое Яблоко</title>
+    <title>🍏 Дроп Золотое Яблоко</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap"
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap"
+      as="style"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap"
       rel="stylesheet"
     />
+    <!-- Добавил премиальный шрифт для рулетки -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
+      /* ╔══════════════════════════════════════╗
+         ║         1. GLOBAL RESET             ║
+         ╚══════════════════════════════════════╝ */
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-      :root {
-        /* Фирменные цвета Золотого Яблока */
-        --ga-green: #d2ff00;
-        --ga-green-hover: #bce600;
-        --ga-bg-top: #eceef1;
-        --ga-bg-bot: #d5d8df;
-        --ga-text: #1a1a1a;
-        --ga-text-muted: #888888;
-        --ga-card: #f8f9fb;
-
-        /* Оригинальные системные переменные, адаптированные под новый стиль */
-        --green: #d2ff00;
-        --green-l: #e0ff33;
-        --green-ll: #aeea00;
-        --gold: #aeea00; /* заменен на оттенок салатового для консистентности */
-        --gold-d: #8cbf00;
-        --bg: #eceef1;
-        --bg2: #e2e5e9;
-        --bg3: #d5d8df;
-        --text: #1a1a1a;
-        --text2: #555;
-        --text3: #999;
-        --white: #fff;
-        --red: #d32f2f;
-        --safe-top: env(safe-area-inset-top, 0px);
-        --safe-bot: env(safe-area-inset-bottom, 0px);
-      }
-
       body {
         width: 100vw;
         height: 100vh;
         height: 100dvh;
         overflow: hidden;
-        background: linear-gradient(
-          180deg,
-          var(--ga-bg-top) 0%,
-          var(--ga-bg-bot) 100%
-        );
-        color: var(--text);
-        font-family: "Montserrat", system-ui, sans-serif;
+        background: #eceef1; /* Светлый фон как в ЗЯ */
+        color: #333;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         -webkit-tap-highlight-color: transparent;
         user-select: none;
         touch-action: manipulation;
       }
+      :root {
+        --purple: #976fff;
+        --blue: #6b93ff;
+        --pink: #e46ace;
+        --green: #4caf50;
+        --red: #ff4757;
 
-      /* ── Scenes ── */
+        /* Цвета Золотого Яблока */
+        --ga-neon: #d2ff00;
+        --ga-neon-dark: #bce600;
+
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bot: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* ╔══════════════════════════════════════╗
+         ║         2. SCENE SYSTEM             ║
+         ╚══════════════════════════════════════╝ */
       .scene {
         position: fixed;
         inset: 0;
@@ -77,6 +74,7 @@
           opacity 0.3s,
           visibility 0s 0.3s;
         z-index: 1;
+        background: #eceef1;
       }
       .scene.active {
         opacity: 1;
@@ -90,23 +88,21 @@
         transition: none !important;
       }
 
-      /* ── Loading ── */
       #scene-loading {
         align-items: center;
         justify-content: center;
         z-index: 999;
-        background: var(--bg);
       }
       .loader {
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        border-top-color: var(--ga-text);
+        width: 36px;
+        height: 36px;
+        border: 3px solid #ddd;
+        border-top-color: var(--ga-neon);
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
       }
       .loader-text {
-        color: var(--text3);
+        color: #888;
         font-size: 13px;
         margin-top: 14px;
         font-weight: 600;
@@ -117,11 +113,16 @@
         }
       }
 
-      /* ── НОВЫЙ WHEEL SCENE (ЗОЛОТОЕ ЯБЛОКО) ── */
-      #scene-wheel {
-        justify-content: space-between;
+      /* ╔══════════════════════════════════════╗
+         ║   3. НОВАЯ МИНИ-ИГРА (РУЛЕТКА ЗЯ)   ║
+         ╚══════════════════════════════════════╝ */
+      #scene-game {
+        font-family: "Montserrat", sans-serif;
         padding: max(20px, var(--safe-top)) 0 max(30px, var(--safe-bot));
+        justify-content: space-between;
+        background: linear-gradient(180deg, #eceef1 0%, #d5d8df 100%);
       }
+
       .top-toast {
         position: absolute;
         top: max(10px, var(--safe-top));
@@ -138,8 +139,9 @@
         gap: 8px;
         z-index: 10;
         white-space: nowrap;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       }
+
       .hero-decor {
         flex: 1;
         display: flex;
@@ -153,23 +155,24 @@
       }
       .hero-title {
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 800;
         line-height: 1.3;
         margin-bottom: 10px;
         z-index: 2;
-        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
+        text-shadow: 0 2px 10px #fff;
       }
       .hero-prize-huge {
         font-size: 52px;
         font-weight: 900;
         letter-spacing: -2px;
         color: transparent;
-        background: linear-gradient(180deg, #ffffff 0%, #b0b5bd 100%);
+        background: linear-gradient(180deg, #ffffff 0%, #a0a5ad 100%);
         -webkit-background-clip: text;
-        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
-        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.8);
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
         z-index: 2;
       }
+
       .floating-item {
         position: absolute;
         font-size: 40px;
@@ -203,11 +206,12 @@
         }
       }
 
+      /* Лента Рулетки */
       .roulette-container {
         position: relative;
         width: 100%;
         height: 140px;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -237,12 +241,13 @@
         height: 100%;
         width: max-content;
         gap: 12px;
-        padding: 0 calc(50vw - 45px); /* Центрирует первую карточку */
+        padding: 0 calc(50vw - 45px);
       }
+
       .r-card {
         width: 90px;
         height: 90px;
-        background: var(--ga-card);
+        background: #f8f9fb;
         border-radius: 20px;
         flex-shrink: 0;
         display: flex;
@@ -252,20 +257,19 @@
         box-shadow:
           inset 0 2px 4px rgba(255, 255, 255, 0.8),
           inset 0 -4px 6px rgba(0, 0, 0, 0.05),
-          0 10px 15px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.5);
+          0 10px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #fff;
         transform: scale(0.9);
         transition:
           transform 0.2s,
           background 0.2s;
-        text-align: center;
         padding: 5px;
       }
       .r-card.active {
         transform: scale(1.1);
         background: #fff;
         box-shadow:
-          0 0 0 3px var(--ga-green),
+          0 0 0 3px var(--ga-neon),
           0 15px 25px rgba(210, 255, 0, 0.3);
       }
       .r-emoji {
@@ -275,11 +279,13 @@
       }
       .r-label {
         font-size: 10px;
-        font-weight: 800;
-        color: var(--ga-text);
+        font-weight: 900;
+        color: #1a1a1a;
         line-height: 1.1;
+        text-align: center;
       }
 
+      /* Указатель */
       .pointer-wrapper {
         position: absolute;
         bottom: 0;
@@ -295,64 +301,68 @@
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--ga-green);
-        box-shadow: 0 0 8px var(--ga-green);
+        background: var(--ga-neon);
+        box-shadow: 0 0 8px var(--ga-neon);
       }
       .pointer-triangle {
         width: 0;
         height: 0;
         border-left: 12px solid transparent;
         border-right: 12px solid transparent;
-        border-bottom: 18px solid var(--ga-green);
+        border-bottom: 18px solid var(--ga-neon);
         filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
       }
 
       .action-area {
-        padding: 0 20px;
+        padding: 0 24px;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 12px;
+        width: 100%;
       }
       .ga-btn {
         width: 100%;
         max-width: 380px;
         padding: 18px;
-        background: var(--ga-green);
-        color: var(--ga-text);
+        background: var(--ga-neon);
+        color: #000;
         font-size: 18px;
         font-weight: 800;
-        border: 4px solid rgba(255, 255, 255, 0.8);
+        border: 4px solid #fff;
         border-radius: 40px;
         cursor: pointer;
         box-shadow: 0 10px 25px rgba(210, 255, 0, 0.4);
         transition: transform 0.1s;
-        text-align: center;
       }
       .ga-btn:active {
         transform: scale(0.96);
+        background: var(--ga-neon-dark);
       }
       .ga-btn:disabled {
-        opacity: 0.6;
+        opacity: 0.7;
         pointer-events: none;
         filter: grayscale(1);
         box-shadow: none;
       }
       .terms-text {
         font-size: 11px;
-        color: var(--ga-text-muted);
+        color: #888;
         text-align: center;
         line-height: 1.4;
-      }
-      .terms-text span {
-        color: #9c8a8a;
+        font-weight: 600;
       }
 
-      /* ── ОРИГИНАЛЬНЫЙ СТИЛЬ: Done Scene & Timer ── */
+      /* ╔══════════════════════════════════════╗
+         ║      5. DONE SCENE (TIMER)          ║
+         ╚══════════════════════════════════════╝ */
+      /* Весь этот блок оригинальный, не менялся */
       #scene-done {
         align-items: center;
-        padding: max(16px, var(--safe-top)) 24px max(24px, var(--safe-bot));
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: max(16px, var(--safe-top)) 24px max(24px, var(--safe-bot));
+        background: #fff;
       }
       .done-wrap {
         width: 100%;
@@ -362,34 +372,74 @@
         flex-direction: column;
         align-items: center;
       }
-      .done-icon {
-        font-size: 40px;
-        margin-bottom: 4px;
+      .done-check {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 2px;
       }
       .done-sticker {
-        width: 160px;
-        height: 160px;
-        margin: 0 auto 8px;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 4px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 100px;
-        filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
       }
       .done-prize {
-        font-size: 22px;
+        font-size: 26px;
         font-weight: 900;
-        color: var(--text);
+        color: #333;
         margin-bottom: 16px;
+        background: linear-gradient(90deg, #ffd700, #ffa500, #ffd700, #ffa500);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shiny 2.5s linear infinite;
+      }
+      .done-prize.purple-shine {
+        background: linear-gradient(
+          90deg,
+          var(--blue),
+          var(--purple),
+          var(--pink),
+          var(--purple)
+        );
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      @keyframes shiny {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
       }
       .timer-card {
-        background: var(--white);
+        background: linear-gradient(135deg, #f8f9ff, #f0ecff);
         border-radius: 16px;
         padding: 20px;
         margin-bottom: 14px;
+        position: relative;
+        overflow: hidden;
         width: 100%;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        border: 1px solid #fff;
+      }
+      .timer-card::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(
+          circle,
+          rgba(151, 111, 255, 0.06),
+          transparent 70%
+        );
+        border-radius: 50%;
       }
       .timer-main {
         display: flex;
@@ -399,26 +449,35 @@
         margin-bottom: 12px;
       }
       .timer-time {
+        font-family: "Orbitron", sans-serif;
         font-size: 28px;
         font-weight: 900;
-        color: var(--text);
+        color: #333;
         letter-spacing: 2px;
+        line-height: 1;
+        min-width: 185px;
+        text-align: center;
       }
       .timer-time.done {
-        color: var(--ga-text);
+        color: var(--green);
+        font-family: inherit;
         font-size: 20px;
         letter-spacing: 0;
+        font-weight: 800;
+        min-width: auto;
       }
       .timer-pill {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: var(--ga-text);
-        color: var(--ga-green);
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        color: #fff;
         font-weight: 800;
         padding: 5px 11px;
         border-radius: 20px;
         font-size: 12px;
+        flex-shrink: 0;
+        white-space: nowrap;
       }
       .timer-pill.fast {
         animation: pill-p 1s ease-in-out infinite;
@@ -438,18 +497,19 @@
         justify-content: center;
         gap: 6px;
         font-size: 13px;
-        color: var(--text2);
+        color: #888;
         font-weight: 600;
       }
       .timer-dot {
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--ga-text);
-        animation: dot-b 1.5s infinite;
+        background: var(--purple);
+        animation: dot-b 1.5s ease-in-out infinite;
+        flex-shrink: 0;
       }
       .timer-dot.done {
-        background: var(--ga-green);
+        background: var(--green);
         animation: none;
       }
       @keyframes dot-b {
@@ -461,7 +521,6 @@
           opacity: 1;
         }
       }
-
       .timer-progress {
         display: flex;
         align-items: center;
@@ -478,29 +537,32 @@
         font-size: 9px;
         font-weight: 700;
         color: #fff;
-        background: var(--bg3);
+        flex-shrink: 0;
         transition: background 0.3s;
       }
       .tp-dot.done {
-        background: var(--ga-text);
-        color: var(--ga-green);
+        background: var(--green);
       }
       .tp-dot.active {
-        background: var(--ga-green);
-        color: var(--ga-text);
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+      }
+      .tp-dot.pending {
+        background: #ddd;
       }
       .tp-line {
         width: 40px;
         height: 3px;
         border-radius: 2px;
-        background: var(--bg3);
         transition: background 0.3s;
       }
       .tp-line.done {
-        background: var(--ga-text);
+        background: var(--green);
       }
       .tp-line.active {
-        background: linear-gradient(90deg, var(--ga-green), var(--bg3));
+        background: linear-gradient(90deg, var(--purple), #ddd);
+      }
+      .tp-line.pending {
+        background: #e8e8e8;
       }
       .timer-labels {
         display: flex;
@@ -510,16 +572,16 @@
       }
       .tp-label {
         font-size: 10px;
-        color: var(--text3);
+        color: #aaa;
         font-weight: 600;
         text-align: center;
         width: 60px;
       }
       .tp-label.done-l {
-        color: var(--ga-text);
+        color: var(--green);
       }
       .tp-label.active-l {
-        color: var(--ga-text);
+        color: var(--purple);
       }
       .done-actions {
         display: flex;
@@ -527,20 +589,27 @@
         width: 100%;
       }
 
-      /* ── ОРИГИНАЛЬНЫЙ СТИЛЬ: Buttons ── */
+      /* ╔══════════════════════════════════════╗
+         ║      6. SHARED UI COMPONENTS        ║
+         ╚══════════════════════════════════════╝ */
       .btn-primary {
         position: relative;
         width: 100%;
         padding: 15px;
         font-size: 16px;
-        font-weight: 800;
-        color: var(--ga-text);
-        background: var(--ga-green);
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(
+          135deg,
+          var(--blue),
+          var(--purple),
+          var(--pink)
+        );
         border: none;
         border-radius: 14px;
         cursor: pointer;
         overflow: hidden;
-        box-shadow: 0 10px 25px rgba(210, 255, 0, 0.3);
+        box-shadow: 0 4px 15px rgba(151, 111, 255, 0.3);
         transition:
           transform 0.1s,
           opacity 0.3s;
@@ -549,42 +618,83 @@
         transform: scale(0.95);
       }
       .btn-primary:disabled {
-        opacity: 0.5;
+        opacity: 0.35;
         pointer-events: none;
         box-shadow: none;
-        filter: grayscale(1);
       }
-
+      .btn-primary.pulse {
+        animation: btn-glow 1.5s ease-in-out infinite;
+      }
+      @keyframes btn-glow {
+        0%,
+        100% {
+          box-shadow: 0 4px 15px rgba(151, 111, 255, 0.3);
+        }
+        50% {
+          box-shadow:
+            0 4px 30px rgba(151, 111, 255, 0.6),
+            0 0 20px rgba(228, 106, 206, 0.3);
+        }
+      }
+      .btn-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.25),
+          transparent
+        );
+        animation: shine 2.5s ease-in-out infinite;
+      }
+      @keyframes shine {
+        0% {
+          left: -100%;
+        }
+        50%,
+        100% {
+          left: 100%;
+        }
+      }
       .btn-action {
         flex: 1;
         padding: 13px 8px;
         font-size: 13px;
         font-weight: 700;
-        color: var(--ga-text);
+        color: #fff;
         border: none;
         border-radius: 14px;
         cursor: pointer;
         transition: transform 0.1s;
+        line-height: 1.3;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 4px;
-        background: var(--ga-green);
-        box-shadow: 0 4px 15px rgba(210, 255, 0, 0.25);
       }
       .btn-action:active {
         transform: scale(0.95);
       }
+      .btn-action.purple {
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        box-shadow: 0 4px 15px rgba(151, 111, 255, 0.25);
+      }
       .btn-action.dark {
-        background: #1a1a1a;
-        color: var(--ga-green);
+        background: linear-gradient(135deg, #555, #333);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
       }
       .btn-action-icon {
-        font-size: 20px;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
       }
 
-      /* ── ОРИГИНАЛЬНЫЙ СТИЛЬ: Sheets ── */
       .sheet-overlay {
         position: fixed;
         inset: 0;
@@ -596,66 +706,50 @@
       .sheet-bg {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.4);
       }
       .sheet {
         position: relative;
         z-index: 1;
-        background: var(--white);
-        border-radius: 24px 24px 0 0;
+        background: #fff;
+        border-radius: 20px 20px 0 0;
         padding: 10px 24px max(34px, var(--safe-bot));
         max-height: 85vh;
         overflow-y: auto;
         text-align: center;
+        -webkit-overflow-scrolling: touch;
       }
       .sheet-handle {
-        width: 40px;
-        height: 5px;
-        border-radius: 3px;
-        background: #e0e0e0;
-        margin: 0 auto 20px;
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: #ddd;
+        margin: 0 auto 18px;
       }
       .hidden {
         display: none !important;
       }
 
-      /* Prize Sheet */
       .prize-label {
-        font-size: 16px;
-        color: var(--text2);
-        font-weight: 700;
+        font-size: 18px;
+        color: #888;
+        font-weight: 600;
         letter-spacing: 1px;
-        margin-bottom: 8px;
-        text-transform: uppercase;
+        margin-bottom: 6px;
       }
-      .prize-img-wrap {
-        width: 140px;
-        height: 140px;
-        margin: 0 auto 12px;
+      .prize-sticker {
+        width: 130px;
+        height: 130px;
+        margin: 0 auto 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--ga-card);
-        border-radius: 24px;
-        box-shadow: inset 0 -4px 10px rgba(0, 0, 0, 0.05);
-      }
-      .prize-emoji-big {
-        font-size: 80px;
-        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
       }
       .prize-name {
-        font-size: 24px;
-        font-weight: 900;
-        color: var(--ga-text);
-        margin-bottom: 6px;
-      }
-      .prize-brand {
-        font-size: 14px;
-        color: var(--ga-text-muted);
-        font-weight: 700;
-        margin-bottom: 20px;
-        text-transform: uppercase;
+        font-size: 22px;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 10px;
       }
       .prize-cd-wrap {
         height: 60px;
@@ -667,50 +761,54 @@
       #prize-cd {
         font-size: 42px;
         font-weight: 900;
-        color: var(--ga-text);
+        color: var(--purple);
+        line-height: 1;
       }
 
-      /* Subscribe Sheet */
       .sub-sticker {
-        font-size: 60px;
-        margin-bottom: 10px;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .sub-prize {
         font-size: 18px;
-        font-weight: 800;
-        margin-bottom: 10px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 14px;
       }
       .sub-desc {
         font-size: 14px;
         color: #666;
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         line-height: 1.5;
       }
       .sub-progress {
         font-size: 13px;
-        color: var(--text);
+        color: var(--purple);
         font-weight: 700;
         margin-bottom: 12px;
       }
       .sub-list {
         list-style: none;
         margin-bottom: 20px;
-        text-align: left;
       }
       .sub-item {
         display: flex;
         align-items: center;
-        padding: 12px 0;
+        padding: 10px 0;
         border-bottom: 1px solid #f0f0f0;
       }
       .sub-item:last-child {
         border-bottom: none;
       }
       .sub-avatar {
-        width: 46px;
-        height: 46px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
-        background: var(--bg2);
+        background: #e0e0e0;
         margin-right: 12px;
         flex-shrink: 0;
         overflow: hidden;
@@ -718,44 +816,44 @@
         align-items: center;
         justify-content: center;
         font-size: 20px;
-        color: var(--text3);
+        color: #999;
       }
       .sub-avatar img {
         width: 100%;
         height: 100%;
+        border-radius: 50%;
         object-fit: cover;
       }
       .sub-info {
         flex: 1;
+        text-align: left;
         min-width: 0;
       }
       .sub-name {
-        font-size: 15px;
-        font-weight: 700;
-        color: var(--text);
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
       .sub-btn {
-        padding: 8px 16px;
+        padding: 8px 14px;
         font-size: 13px;
-        font-weight: 800;
-        color: var(--text);
-        background: var(--ga-green);
+        font-weight: 600;
+        color: #fff;
+        background: #3390ec;
         border: none;
-        border-radius: 12px;
+        border-radius: 10px;
         cursor: pointer;
         flex-shrink: 0;
         margin-left: 10px;
       }
       .sub-btn.done {
-        background: var(--bg2);
-        color: var(--text3);
+        background: var(--green);
         pointer-events: none;
       }
 
-      /* Speed Sheet (Рефералка) */
       .su-header {
         display: flex;
         align-items: center;
@@ -764,16 +862,21 @@
         margin-bottom: 6px;
       }
       .su-icon {
-        font-size: 22px;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
       }
       .su-title {
         font-size: 18px;
         font-weight: 800;
-        color: var(--text);
+        color: #333;
       }
       .su-desc {
         font-size: 13px;
-        color: var(--text2);
+        color: #888;
         line-height: 1.5;
         margin-bottom: 18px;
       }
@@ -782,7 +885,7 @@
         align-items: center;
         justify-content: center;
         gap: 12px;
-        background: var(--bg2);
+        background: #f8f9fa;
         border-radius: 14px;
         padding: 14px;
         margin-bottom: 20px;
@@ -790,25 +893,26 @@
       .su-stat-val {
         font-size: 26px;
         font-weight: 900;
-        color: var(--text);
+        color: #333;
         line-height: 1;
       }
       .su-stat-label {
         font-size: 11px;
-        color: var(--text3);
+        color: #999;
         margin-top: 4px;
         font-weight: 600;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .su-divider {
         width: 1px;
         height: 40px;
-        background: var(--bg3);
+        background: #e0e0e0;
       }
       .ref-track {
         position: relative;
         height: 8px;
-        background: var(--bg3);
+        background: #e8e8e8;
         border-radius: 4px;
         margin: 10px 14px 52px;
       }
@@ -817,7 +921,7 @@
         top: 0;
         left: 0;
         height: 100%;
-        background: var(--ga-text);
+        background: linear-gradient(90deg, var(--blue), var(--purple));
         border-radius: 4px;
         transition: width 0.6s;
       }
@@ -833,6 +937,7 @@
         font-size: 9px;
         font-weight: 700;
         color: #fff;
+        flex-shrink: 0;
         background: #d0d0d0;
         border: 3px solid #fff;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
@@ -840,8 +945,7 @@
         z-index: 2;
       }
       .ref-ms.on {
-        background: var(--ga-text);
-        color: var(--ga-green);
+        background: linear-gradient(135deg, var(--blue), var(--purple));
       }
       .ref-ms-info {
         position: absolute;
@@ -863,19 +967,19 @@
       }
       .ref-ms.on .ref-ms-count,
       .ref-ms.on .ref-ms-speed {
-        color: var(--ga-text);
+        color: var(--purple);
       }
       .btn-share {
         width: 100%;
-        padding: 16px;
-        font-size: 16px;
-        font-weight: 800;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 700;
         color: #fff;
-        background: #0088cc;
+        background: linear-gradient(135deg, #0088cc, #0077b5);
         border: none;
-        border-radius: 16px;
+        border-radius: 14px;
         cursor: pointer;
-        box-shadow: 0 10px 25px rgba(0, 136, 204, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -885,19 +989,28 @@
       .btn-share:active {
         transform: scale(0.95);
       }
+      .btn-share:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
       .share-tgs {
-        font-size: 18px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
       }
       .ref-hint {
         font-size: 12px;
-        color: var(--text3);
+        color: #aaa;
         margin-top: 10px;
         line-height: 1.4;
       }
       .btn-back {
         background: none;
         border: none;
-        color: var(--text3);
+        color: #999;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
@@ -905,11 +1018,10 @@
         padding: 8px;
       }
 
-      /* Stars Modal (Админка) */
       .modal-fs {
         position: fixed;
         inset: 0;
-        background: var(--white);
+        background: #fff;
         z-index: 200;
         display: flex;
         flex-direction: column;
@@ -919,25 +1031,29 @@
         align-items: center;
         justify-content: space-between;
         padding: 16px 20px;
-        border-bottom: 1px solid var(--bg2);
+        border-bottom: 1px solid #f0f0f0;
         flex-shrink: 0;
       }
       .modal-fs-title {
         font-size: 17px;
         font-weight: 700;
-        color: var(--text);
+        color: #333;
         display: flex;
         align-items: center;
         gap: 6px;
+      }
+      .modal-fs-title .tgs-inline {
+        width: 20px;
+        height: 20px;
       }
       .modal-fs-close {
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--bg2);
+        background: #f0f0f0;
         border: none;
         font-size: 16px;
-        color: var(--text3);
+        color: #999;
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -948,7 +1064,7 @@
         overflow-y: auto;
         padding: 20px;
         font-size: 15px;
-        color: var(--text2);
+        color: #444;
         line-height: 1.7;
         white-space: pre-wrap;
         word-wrap: break-word;
@@ -960,11 +1076,10 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background: var(--ga-text);
-        color: var(--ga-green);
+        background: linear-gradient(135deg, var(--blue), var(--purple));
         border: none;
         font-size: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 20px rgba(151, 111, 255, 0.4);
         cursor: pointer;
         z-index: 215;
         display: flex;
@@ -980,7 +1095,7 @@
       .stars-textarea {
         flex: 1;
         width: 100%;
-        border: 2px solid var(--bg3);
+        border: 2px solid #e0e0e0;
         border-radius: 14px;
         padding: 14px;
         font-size: 15px;
@@ -988,11 +1103,11 @@
         resize: none;
         line-height: 1.6;
         outline: none;
-        background: var(--white);
-        color: var(--text);
+        background: #fff;
+        color: #333;
       }
       .stars-textarea:focus {
-        border-color: var(--ga-text);
+        border-color: var(--purple);
       }
       .stars-edit-btns {
         display: flex;
@@ -1004,8 +1119,8 @@
         padding: 14px;
         font-size: 15px;
         font-weight: 700;
-        color: var(--ga-green);
-        background: var(--ga-text);
+        color: #fff;
+        background: linear-gradient(135deg, #4caf50, #43a047);
         border: none;
         border-radius: 12px;
         cursor: pointer;
@@ -1015,14 +1130,13 @@
         padding: 14px;
         font-size: 15px;
         font-weight: 600;
-        color: var(--text2);
-        background: var(--bg2);
+        color: #666;
+        background: #f0f0f0;
         border: none;
         border-radius: 12px;
         cursor: pointer;
       }
 
-      /* Effects */
       #flash {
         position: fixed;
         inset: 0;
@@ -1032,6 +1146,32 @@
         opacity: 0;
         transition: opacity 0.15s;
       }
+      #edge-glow {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0;
+        transition: opacity 0.5s;
+        background: radial-gradient(
+          ellipse at center,
+          transparent 35%,
+          var(--glow, rgba(255, 215, 0, 0.35)) 100%
+        );
+      }
+      #edge-glow.on {
+        opacity: 1;
+        animation: glow-p 2s ease-in-out infinite;
+      }
+      @keyframes glow-p {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
       .toast {
         position: fixed;
         top: 20px;
@@ -1040,31 +1180,39 @@
         padding: 12px 24px;
         border-radius: 12px;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 600;
         z-index: 9999;
         transition: transform 0.3s;
-        color: #000;
-        background: var(--ga-green);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+        color: #fff;
       }
       .toast.error {
-        background: #ff3b30;
-        color: #fff;
+        background: var(--red);
+      }
+      .toast.success {
+        background: var(--green);
       }
       .toast.show {
         transform: translateX(-50%) translateY(0);
       }
     </style>
   </head>
+
   <body>
-    <!-- ═══ LOADING ═══ -->
+    <!-- ╔══════════════════════════════════════╗
+         ║       SCENE: LOADING                ║
+         ╚══════════════════════════════════════╝ -->
     <div id="scene-loading" class="scene active">
       <div class="loader"></div>
+      <p class="loader-text">Загрузка...</p>
     </div>
 
-    <!-- ═══ WHEEL (ЗОЛОТОЕ ЯБЛОКО) ═══ -->
-    <div id="scene-wheel" class="scene">
+    <!-- ╔══════════════════════════════════════╗
+         ║       SCENE: МИНИ-ИГРА (РУЛЕТКА)    ║
+         ╚══════════════════════════════════════╝ -->
+    <div id="scene-game" class="scene">
       <div class="top-toast">🍏 Эксклюзивные подарки уже ждут вас</div>
+
       <div class="hero-decor">
         <div class="floating-item fl-1">💄</div>
         <div class="floating-item fl-2">🍏</div>
@@ -1078,7 +1226,7 @@
       <div class="roulette-container">
         <div class="roulette-window">
           <div class="roulette-track" id="roulette-track">
-            <!-- Сюда вставляются карточки -->
+            <!-- Карточки генерируются скриптом -->
           </div>
         </div>
         <div class="pointer-wrapper">
@@ -1088,32 +1236,37 @@
       </div>
 
       <div class="action-area">
-        <button id="wheel-spin-btn" class="ga-btn">бесплатный старт</button>
+        <button id="btn-spin" class="ga-btn">бесплатный старт</button>
         <div class="terms-text">
-          Нажимая на кнопку, я соглашаюсь<br />с <span>Условиями акции</span>
+          Нажимая на кнопку, я соглашаюсь<br />с Условиями акции
         </div>
       </div>
     </div>
 
-    <!-- ═══ DONE SCENE (ИЗ ОРИГИНАЛА) ═══ -->
+    <!-- ╔══════════════════════════════════════╗
+         ║       SCENE: DONE (TIMER)           ║
+         ╚══════════════════════════════════════╝ -->
     <div id="scene-done" class="scene">
       <div class="done-wrap">
-        <div class="done-icon" id="done-icon" style="font-size: 30px">✅</div>
-        <div class="done-sticker" id="done-sticker">🎁</div>
+        <div class="done-check" id="done-check"></div>
+        <div class="done-sticker" id="done-sticker"></div>
         <p class="done-prize" id="done-prize"></p>
-
         <div class="timer-card">
           <div class="timer-main">
             <div class="timer-time" id="timer-time">24:00:00</div>
             <div class="timer-pill" id="timer-pill">
-              ⚡ <span id="timer-speed">x1</span>
+              <span
+                class="tgs-inline"
+                id="pill-lightning"
+                style="width: 14px; height: 14px"
+              ></span>
+              <span id="timer-speed">x1</span>
             </div>
           </div>
           <div class="timer-status">
             <div class="timer-dot" id="timer-dot"></div>
             <span id="timer-text">Подготавливаем приз...</span>
           </div>
-
           <div class="timer-progress">
             <div id="tp1" class="tp-dot done">✓</div>
             <div id="tl1" class="tp-line done"></div>
@@ -1127,68 +1280,69 @@
             <div id="tlbl3" class="tp-label">Выдача</div>
           </div>
         </div>
-
         <div id="done-actions-timer" class="done-actions">
-          <button id="btn-speedup" class="btn-action">
-            <span class="btn-action-icon">🚀</span><span>Ускорить</span>
+          <button id="btn-speedup" class="btn-action purple">
+            <span class="btn-action-icon" id="btn-rocket-tgs"></span>
+            <span>Ускорить</span>
           </button>
           <button id="btn-earn-stars" class="btn-action dark">
-            <span class="btn-action-icon">⭐</span><span>Правила</span>
+            <span class="btn-action-icon" id="btn-star-tgs"></span>
+            <span>Заработать</span>
           </button>
         </div>
         <div id="done-actions-final" class="done-actions hidden">
-          <button id="btn-finalize" class="btn-primary">
-            <span>🎁 Получить приз</span>
+          <button id="btn-finalize" class="btn-primary pulse">
+            <span>🎁 Получить приз</span><span class="btn-shine"></span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ═══ PRIZE SHEET ═══ -->
+    <!-- ╔══════════════════════════════════════╗
+         ║       SHEETS (BOTTOM PANELS)        ║
+         ╚══════════════════════════════════════╝ -->
     <div id="sheet-prize" class="sheet-overlay hidden">
       <div class="sheet-bg"></div>
       <div class="sheet">
         <div class="sheet-handle"></div>
         <div class="prize-label">ВАМ ВЫПАЛО:</div>
-        <div class="prize-img-wrap">
-          <div class="prize-emoji-big" id="prize-emoji">🎁</div>
-        </div>
+        <div class="prize-sticker" id="prize-sticker"></div>
         <p class="prize-name" id="prize-name"></p>
-        <p class="prize-brand" id="prize-brand"></p>
         <div class="prize-cd-wrap"><div id="prize-cd"></div></div>
-        <button id="btn-claim" class="btn-primary" disabled>ЗАБРАТЬ</button>
-      </div>
-    </div>
-
-    <!-- ═══ SUBSCRIBE SHEET ═══ -->
-    <div id="sheet-sub" class="sheet-overlay hidden">
-      <div class="sheet-bg"></div>
-      <div class="sheet">
-        <div class="sheet-handle"></div>
-        <div class="sub-sticker">🎁</div>
-        <p class="sub-prize" id="sub-prize"></p>
-        <p class="sub-desc">Чтобы забрать приз, подпишитесь на спонсоров:</p>
-        <div class="sub-progress" id="sub-progress"></div>
-        <ul class="sub-list" id="sub-list"></ul>
-        <button id="btn-check-sub" class="btn-primary">
-          Проверить подписку
+        <button id="btn-claim" class="btn-primary" disabled>
+          <span>ЗАБРАТЬ</span><span class="btn-shine"></span>
         </button>
       </div>
     </div>
 
-    <!-- ═══ SPEED SHEET (Рефералка) ═══ -->
+    <div id="sheet-sub" class="sheet-overlay hidden">
+      <div class="sheet-bg"></div>
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sub-sticker" id="sub-sticker"></div>
+        <p class="sub-prize" id="sub-prize"></p>
+        <p class="sub-desc">
+          Чтобы получить приз, подпишитесь на&nbsp;наших спонсоров:
+        </p>
+        <div class="sub-progress" id="sub-progress"></div>
+        <ul class="sub-list" id="sub-list"></ul>
+        <button id="btn-check-sub" class="btn-primary">
+          <span>Проверить подписку</span><span class="btn-shine"></span>
+        </button>
+      </div>
+    </div>
+
     <div id="sheet-speed" class="sheet-overlay hidden">
       <div class="sheet-bg"></div>
       <div class="sheet">
         <div class="sheet-handle"></div>
         <div class="su-header">
-          <div class="su-icon">🚀</div>
+          <div class="su-icon" id="su-rocket-tgs"></div>
           <div class="su-title">Ускорить вывод</div>
         </div>
         <p class="su-desc">
           Пригласи друзей — каждые 2 друга ускоряют таймер вдвое!
         </p>
-
         <div class="su-stats">
           <div style="text-align: center">
             <div class="su-stat-val" id="su-refs">0</div>
@@ -1200,7 +1354,6 @@
             <div class="su-stat-label">Скорость</div>
           </div>
         </div>
-
         <div style="margin-bottom: 20px">
           <div class="ref-track">
             <div class="ref-fill" id="ref-fill" style="width: 0"></div>
@@ -1230,10 +1383,9 @@
             </div>
           </div>
         </div>
-
         <button id="btn-share" class="btn-share">
-          <span class="share-tgs">✈️</span
-          ><span id="btn-share-text">Пригласить друга</span>
+          <span class="share-tgs" id="share-invite-tgs"></span>
+          <span id="btn-share-text">Пригласить друга</span>
         </button>
         <p class="ref-hint">
           Ваша реферальная ссылка будет прикреплена автоматически
@@ -1242,11 +1394,22 @@
       </div>
     </div>
 
-    <!-- ═══ STARS MODAL (Админка) ═══ -->
+    <!-- ╔══════════════════════════════════════╗
+         ║       MODAL: EARN STARS             ║
+         ╚══════════════════════════════════════╝ -->
     <div id="modal-stars" class="modal-fs hidden">
       <div class="modal-fs-header">
-        <span class="modal-fs-title">⭐ Правила акции</span>
-        <button id="btn-close-stars" class="modal-fs-close">✕</button>
+        <span class="modal-fs-title"
+          ><span class="tgs-inline" id="modal-star-tgs"></span>Заработать
+          звёзды</span
+        >
+        <button
+          id="btn-close-stars"
+          class="modal-fs-close"
+          aria-label="Закрыть"
+        >
+          ✕
+        </button>
       </div>
       <div id="stars-content" class="modal-fs-body"></div>
       <div id="stars-edit" class="stars-edit-wrap hidden">
@@ -1259,9 +1422,16 @@
       <button id="btn-edit-stars" class="btn-admin-edit hidden">✏️</button>
     </div>
 
+    <!-- ╔══════════════════════════════════════╗
+         ║       EFFECTS LAYER                 ║
+         ╚══════════════════════════════════════╝ -->
     <div id="flash"></div>
+    <div id="edge-glow"></div>
     <div id="toast" class="toast"></div>
 
+    <!-- ╔══════════════════════════════════════╗
+         ║       EXTERNAL LIBRARIES            ║
+         ╚══════════════════════════════════════╝ -->
     <script
       defer
       src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
@@ -1270,11 +1440,24 @@
       defer
       src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
     ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"
+    ></script>
 
     <script>
       window.addEventListener("load", () => {
         const ck = setInterval(() => {
-          if (typeof gsap !== "undefined" && typeof confetti !== "undefined") {
+          if (
+            typeof gsap !== "undefined" &&
+            typeof confetti !== "undefined" &&
+            typeof lottie !== "undefined" &&
+            typeof pako !== "undefined"
+          ) {
             clearInterval(ck);
             startApp();
           }
@@ -1282,34 +1465,58 @@
       });
 
       function startApp() {
-        const BOT = "premkarobot";
-        const T_SEC = 86400;
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║                  MODULE 1: CONFIG                       ║
+           ╚══════════════════════════════════════════════════════════╝ */
+        const CONFIG = {
+          BOT: "premkarobot",
+          TIMER_SECONDS: 86400,
+        };
 
-        /* Призы (Сектора) */
-        const SECTORS = [
-          { label: "Dior", emoji: "🖤", brand: "Sauvage" },
-          { label: "Charlotte", emoji: "🌸", brand: "Палетка" },
-          { label: "MAC", emoji: "💄", brand: "Ruby Woo" },
-          { label: "Dyson", emoji: "✨", brand: "Airwrap" },
-          { label: "YSL", emoji: "🌹", brand: "Libre" },
-          { label: "La Mer", emoji: "💎", brand: "Крем" },
-          { label: "Sol de Jan", emoji: "🍊", brand: "Set" },
-          { label: "50 000 ₽", emoji: "🍏", brand: "Бонусы" },
+        const TGS = {
+          starY: "assets/star_yellow.tgs",
+          starP: "assets/star_purple.tgs",
+          modalS: "assets/modalstars.tgs",
+          modalP: "assets/modalpremium.tgs",
+          rocket: "assets/rocket.tgs",
+          star: "assets/star.tgs",
+          lightning: "assets/lightning.tgs",
+          check: "assets/true.tgs",
+          invite: "assets/invite.tgs",
+        };
+
+        const PRIZE_META = {
+          stars: {
+            tgs: TGS.starY,
+            modal: TGS.modalS,
+            glow: "rgba(255,215,0,.35)",
+            fill: "gold",
+            shine: "",
+          },
+          premium: {
+            tgs: TGS.starP,
+            modal: TGS.modalP,
+            glow: "rgba(124,103,254,.35)",
+            fill: "purple",
+            shine: "purple-shine",
+          },
+        };
+
+        // Данные для рулетки
+        const ROULETTE_SECTORS = [
+          { label: "Dior Sauvage", emoji: "🖤" },
+          { label: "Charlotte Tilbury", emoji: "🌸" },
+          { label: "MAC Ruby Woo", emoji: "💄" },
+          { label: "Dyson Airwrap", emoji: "✨" },
+          { label: "YSL Libre", emoji: "🌹" },
+          { label: "La Mer", emoji: "💎" },
+          { label: "Sol de Janeiro", emoji: "🍊" },
+          { label: "Бонусы", emoji: "🍏" },
         ];
 
-        let CHANNELS = [],
-          US = null,
-          isAdmin = false;
-        const openedBots = new Set();
-        let claimedAt = null,
-          refCount = 0,
-          tSpeed = 1,
-          tInt = null;
-        let wonPrize = null,
-          appState = "loading";
-        let isChecking = false,
-          isSharing = false;
-
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║                  MODULE 2: UTILS                        ║
+           ╚══════════════════════════════════════════════════════════╝ */
         const $ = (id) => document.getElementById(id);
         const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         const haptic = (t) => {
@@ -1333,6 +1540,9 @@
             sc = Math.floor(s % 60);
           return [h, m, sc].map((v) => String(v).padStart(2, "0")).join(":");
         }
+        function getMeta(key) {
+          return PRIZE_META[key] || PRIZE_META.stars;
+        }
 
         let toastTimer = null;
         function toast(t, tp = "error", ms = 3000) {
@@ -1347,6 +1557,153 @@
           }, ms);
         }
 
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║                  MODULE 3: API CLIENT                   ║
+           ╚══════════════════════════════════════════════════════════╝ */
+        function gID() {
+          try {
+            return Telegram.WebApp.initData;
+          } catch (e) {
+            return "";
+          }
+        }
+
+        async function api(ep, body = {}) {
+          for (let i = 0; i < 3; i++) {
+            try {
+              const r = await fetch(`/api/${ep}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ initData: gID(), ...body }),
+              });
+              if (!r.ok) {
+                if (r.status >= 400 && r.status < 500 && r.status !== 429)
+                  return { ok: false };
+                if (i < 2) {
+                  await sleep(1000 * (i + 1));
+                  continue;
+                }
+                return { ok: false };
+              }
+              return await r.json();
+            } catch (e) {
+              if (i < 2) {
+                await sleep(1000 * (i + 1));
+                continue;
+              }
+              return { ok: false, error: "network" };
+            }
+          }
+          return { ok: false };
+        }
+
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║                  MODULE 4: TGS / LOTTIE                ║
+           ╚══════════════════════════════════════════════════════════╝ */
+        const tgsC = {},
+          tgsS = {};
+        let activeLotties = [],
+          iconLotties = [];
+        try {
+          lottie.setQuality(2);
+        } catch (e) {}
+
+        async function loadTGS(u) {
+          if (tgsC[u] !== undefined) return tgsC[u];
+          try {
+            const r = await fetch(u);
+            if (!r.ok) throw 0;
+            const b = await r.arrayBuffer();
+            const j = pako.inflate(new Uint8Array(b), { to: "string" });
+            tgsC[u] = JSON.parse(j);
+            tgsS[u] = j;
+            return tgsC[u];
+          } catch (e) {
+            tgsC[u] = null;
+            return null;
+          }
+        }
+
+        function cloneTGS(u) {
+          return tgsS[u] ? JSON.parse(tgsS[u]) : null;
+        }
+
+        function playLottie(c, u, loop = true) {
+          activeLotties = activeLotties.filter((a) => {
+            try {
+              if (a._c === c) {
+                a.destroy();
+                return false;
+              }
+            } catch (e) {
+              return false;
+            }
+            return true;
+          });
+          c.innerHTML = "";
+          const d = cloneTGS(u);
+          if (!d) return null;
+          const a = lottie.loadAnimation({
+            container: c,
+            renderer: "svg",
+            loop,
+            autoplay: true,
+            animationData: d,
+          });
+          a.setSubframe(false);
+          a._c = c;
+          activeLotties.push(a);
+          return a;
+        }
+
+        function playIcon(c, u) {
+          iconLotties = iconLotties.filter((a) => {
+            try {
+              if (a && a._c === c) {
+                a.destroy();
+                return false;
+              }
+            } catch (e) {
+              return false;
+            }
+            return true;
+          });
+          c.innerHTML = "";
+          const d = cloneTGS(u);
+          if (!d) return null;
+          const a = lottie.loadAnimation({
+            container: c,
+            renderer: "svg",
+            loop: true,
+            autoplay: true,
+            animationData: d,
+          });
+          a.setSubframe(false);
+          a._c = c;
+          iconLotties.push(a);
+          return a;
+        }
+
+        function killLotties() {
+          activeLotties.forEach((a) => {
+            try {
+              a.destroy();
+            } catch (e) {}
+          });
+          activeLotties = [];
+        }
+        function killIcons() {
+          iconLotties.forEach((a) => {
+            try {
+              a.destroy();
+            } catch (e) {}
+          });
+          iconLotties = [];
+        }
+
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║                  MODULE 6: SCENE MANAGER                ║
+           ╚══════════════════════════════════════════════════════════╝ */
         function showScene(id, instant = false) {
           document.querySelectorAll(".scene").forEach((s) => {
             if (instant) {
@@ -1419,54 +1776,64 @@
           });
         } catch (e) {}
 
-        function gID() {
-          try {
-            return Telegram.WebApp.initData;
-          } catch (e) {
-            return "";
-          }
-        }
-        async function api(ep, body = {}) {
-          for (let i = 0; i < 3; i++) {
-            try {
-              const r = await fetch(`/api/${ep}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ initData: gID(), ...body }),
-              });
-              if (!r.ok) {
-                if (r.status >= 400 && r.status < 500 && r.status !== 429)
-                  return { ok: false };
-                await sleep(1000 * (i + 1));
-                continue;
-              }
-              return await r.json();
-            } catch (e) {
-              await sleep(1000 * (i + 1));
-            }
-          }
-          return { ok: false };
-        }
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║              MODULE 7: APP STATE                        ║
+           ╚══════════════════════════════════════════════════════════╝ */
+        let CHANNELS = [],
+          US = null,
+          isAdmin = false;
+        const openedBots = new Set();
+        let claimedAt = null,
+          refCount = 0,
+          tSpeed = 1,
+          tInt = null;
+        let wonPrize = null,
+          appState = "loading",
+          isChecking = false;
+        let isSharing = false,
+          isSpinning = false;
 
-        /* ═══════════ НОВАЯ ЛОГИКА РУЛЕТКИ (ЗОЛОТОЕ ЯБЛОКО) ═══════════ */
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║        MODULE 8 & 9: РУЛЕТКА (ВМЕСТО РИСОВАНИЯ)         ║
+           ╚══════════════════════════════════════════════════════════╝ */
         const track = $("roulette-track");
-        const CARD_WIDTH = 90;
-        const CARD_GAP = 12;
-        const ITEM_SIZE = CARD_WIDTH + CARD_GAP;
-        let generatedCards = [];
-        let isSpinning = false;
+        const ITEM_W = 90;
+        const ITEM_GAP = 12;
+        const ITEM_SIZE = ITEM_W + ITEM_GAP;
+        let genCards = [];
+
+        function initGame() {
+          showScene("game", true);
+          setupRoulette();
+          appState = "ready_to_spin";
+          // Анимация появления рулетки
+          gsap.from(".hero-decor", { y: 20, opacity: 0, duration: 0.4 });
+          gsap.from(".roulette-container", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.6,
+            delay: 0.15,
+            ease: "back.out(1.5)",
+          });
+          gsap.from(".action-area", {
+            y: 20,
+            opacity: 0,
+            duration: 0.3,
+            delay: 0.3,
+          });
+        }
 
         function setupRoulette() {
           track.innerHTML = "";
-          generatedCards = [];
-          const totalCards = 60; // Длинный трек для красивого вращения
+          genCards = [];
+          const totalCards = 60; // Создаем длинную ленту
           for (let i = 0; i < totalCards; i++) {
-            const sector = SECTORS[i % SECTORS.length];
+            const s = ROULETTE_SECTORS[i % ROULETTE_SECTORS.length];
             const div = document.createElement("div");
             div.className = "r-card";
-            div.innerHTML = `<div class="r-emoji">${sector.emoji}</div><div class="r-label">${sector.label}</div>`;
+            div.innerHTML = `<div class="r-emoji">${s.emoji}</div><div class="r-label">${s.label}</div>`;
             track.appendChild(div);
-            generatedCards.push({ el: div, sector });
+            genCards.push({ el: div, sector: s });
           }
           gsap.set(track, { x: 0 });
           updateCardFocus(0);
@@ -1474,28 +1841,43 @@
 
         function updateCardFocus(currentX) {
           const centerIndex = Math.round(Math.abs(currentX) / ITEM_SIZE);
-          generatedCards.forEach((c, i) => {
+          genCards.forEach((c, i) => {
             if (i === centerIndex) c.el.classList.add("active");
             else c.el.classList.remove("active");
           });
         }
 
-        async function spinRoulette(targetPrizeName) {
-          if (isSpinning) return;
+        $("btn-spin").addEventListener("click", async () => {
+          if (appState !== "ready_to_spin" || isSpinning) return;
           isSpinning = true;
-
-          const btn = $("wheel-spin-btn");
+          appState = "spinning";
+          const btn = $("btn-spin");
           btn.disabled = true;
           btn.textContent = "Крутим...";
+          haptic("medium");
 
-          // Ищем индекс приза. Берем 48+ для долгого вращения
-          const baseIndex = SECTORS.findIndex(
-            (s) =>
-              targetPrizeName.includes(s.label) ||
-              targetPrizeName.includes(s.brand),
+          // Отправляем запрос на сервер (здесь action 'spin_wheel' как в твоем сервере)
+          const res = await api("process-action", { action: "spin_wheel" });
+          if (!res.ok || !res.prize) {
+            toast(
+              res.error === "Already played"
+                ? "Вы уже играли"
+                : "Ошибка сервера",
+            );
+            appState = "ready_to_spin";
+            btn.disabled = false;
+            btn.textContent = "бесплатный старт";
+            isSpinning = false;
+            return;
+          }
+          wonPrize = res.prize;
+
+          // Ищем индекс приза. Чтобы крутилось долго, берем индекс > 45
+          const baseIdx = ROULETTE_SECTORS.findIndex((s) =>
+            wonPrize.name.includes(s.label.split(" ")[0]),
           );
-          const targetIndex = 48 + (baseIndex >= 0 ? baseIndex : 0);
-          const targetX = -(targetIndex * ITEM_SIZE);
+          const targetIdx = 48 + (baseIdx >= 0 ? baseIdx : 0);
+          const targetX = -(targetIdx * ITEM_SIZE);
 
           let lastTick = 0;
           await new Promise((resolve) => {
@@ -1504,26 +1886,25 @@
               duration: 6,
               ease: "power4.out", // Медленное затухание в конце
               onUpdate: function () {
-                const currentX = this.targets()[0]._gsap.x;
-                updateCardFocus(currentX);
-                const currentTick = Math.round(Math.abs(currentX) / ITEM_SIZE);
-                if (currentTick !== lastTick) {
-                  haptic("light"); // Тик при смене карточки
-                  lastTick = currentTick;
+                const cx = this.targets()[0]._gsap.x;
+                updateCardFocus(cx);
+                const tick = Math.round(Math.abs(cx) / ITEM_SIZE);
+                if (tick !== lastTick) {
+                  haptic("light");
+                  lastTick = tick;
                 }
               },
               onComplete: resolve,
             });
           });
 
-          isSpinning = false;
           haptic("heavy");
           hapticNotif("success");
 
+          // Вспышка и конфетти
           const flash = $("flash");
           flash.style.opacity = "1";
           setTimeout(() => (flash.style.opacity = "0"), 150);
-
           confetti({
             particleCount: 100,
             spread: 80,
@@ -1532,42 +1913,30 @@
           });
 
           await sleep(1000);
-          showPrizeSheet(targetIndex);
-        }
-
-        $("wheel-spin-btn").addEventListener("click", async () => {
-          if (appState !== "wheel" || isSpinning) return;
-          appState = "spinning";
-          haptic("medium");
-
-          const res = await api("process-action", { action: "spin_wheel" });
-          if (!res.ok || !res.prize) {
-            toast(
-              res.error === "Already played"
-                ? "Вы уже играли"
-                : "Ошибка сервера",
-            );
-            appState = "wheel";
-            $("wheel-spin-btn").disabled = false;
-            return;
-          }
-          wonPrize = res.prize;
-          await spinRoulette(wonPrize.name);
+          showPrizeAndClaim();
         });
 
-        /* ═══════════ ОРИГИНАЛЬНАЯ ЛОГИКА ШТОРОК И ТАЙМЕРОВ ═══════════ */
-        async function showPrizeSheet(winIndex) {
-          const s = generatedCards[winIndex].sector;
-          $("prize-emoji").textContent = s.emoji;
+        async function showPrizeAndClaim() {
+          appState = "prize";
+          const meta = getMeta(wonPrize.key);
+
           $("prize-name").textContent = wonPrize.name;
-          $("prize-brand").textContent = s.brand;
           $("btn-claim").disabled = true;
+          $("btn-claim").classList.remove("pulse");
           $("prize-cd").textContent = "";
 
           openSheet("sheet-prize");
+          await sleep(300);
+
+          const glow = $("edge-glow");
+          glow.style.setProperty("--glow", meta.glow);
+          glow.classList.add("on");
+
+          playLottie($("prize-sticker"), meta.modal, false);
 
           for (let i = 3; i >= 1; i--) {
             $("prize-cd").textContent = i;
+            $("prize-cd").style.color = "var(--purple)";
             gsap.fromTo(
               $("prize-cd"),
               { scale: 1.4, opacity: 0 },
@@ -1577,18 +1946,24 @@
             await sleep(1000);
           }
           $("prize-cd").textContent = "ГОТОВО!";
+          $("prize-cd").style.color = "var(--green)";
           gsap.fromTo(
             $("prize-cd"),
             { scale: 1.4, opacity: 0 },
             { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" },
           );
           hapticNotif("success");
-          await sleep(800);
+          await sleep(1200);
           $("btn-claim").disabled = false;
-          appState = "prize";
+          $("btn-claim").classList.add("pulse");
         }
 
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║           MODULE 10: SUBSCRIBE FLOW                     ║
+           ╚══════════════════════════════════════════════════════════╝ */
         $("btn-claim").addEventListener("click", () => {
+          $("btn-claim").classList.remove("pulse");
+          $("edge-glow").classList.remove("on");
           closeSheet("sheet-prize", showSub);
         });
 
@@ -1599,9 +1974,12 @@
         }
 
         function showSub() {
-          $("sub-prize").textContent = wonPrize
-            ? wonPrize.name
-            : US?.prize_name || "Приз";
+          killLotties();
+          const pKey = wonPrize ? wonPrize.key : US?.prize_key || "stars";
+          const pName = wonPrize ? wonPrize.name : US?.prize_name || "Приз";
+          const meta = getMeta(pKey);
+          $("sub-prize").textContent = pName;
+          if (meta.modal) playLottie($("sub-sticker"), meta.modal, false);
           const list = $("sub-list");
           list.innerHTML = "";
           CHANNELS.forEach((ch) => {
@@ -1620,21 +1998,19 @@
               };
               av.appendChild(img);
             } else av.textContent = isBot ? "🤖" : "📢";
-
             const info = document.createElement("div");
             info.className = "sub-info";
             const nm = document.createElement("div");
             nm.className = "sub-name";
             nm.textContent = ch.name;
             info.appendChild(nm);
-
             const btn = document.createElement("button");
             btn.className = "sub-btn";
             btn.textContent = isBot ? "Открыть" : "Подписаться";
             btn.addEventListener("click", (e) => {
               e.stopPropagation();
               try {
-                if (ch.link.includes("t.me/"))
+                if (ch.link && ch.link.includes("t.me/"))
                   Telegram.WebApp.openTelegramLink(ch.link);
                 else Telegram.WebApp.openLink(ch.link);
               } catch (err) {
@@ -1648,7 +2024,7 @@
                 api("process-action", {
                   action: "mark_bot_opened",
                   bot_id: ch.id,
-                });
+                }).catch(() => {});
               }
             });
             li.append(av, info, btn);
@@ -1664,7 +2040,7 @@
           isChecking = true;
           const btn = $("btn-check-sub");
           btn.disabled = true;
-          btn.textContent = "Проверяем...";
+          btn.querySelector("span").textContent = "Проверяем...";
           try {
             const res = await api("process-action", {
               action: "check_subscriptions",
@@ -1678,7 +2054,8 @@
               toast("Подписки подтверждены!", "success");
               refCount = res.referral_count || 0;
               tSpeed = calcSpeed(refCount);
-              claimedAt = res.claimed_at || Date.now() / 1000;
+              if (res.claimed_at) claimedAt = res.claimed_at;
+              else claimedAt = Date.now() / 1000;
               await sleep(800);
               closeSheet("sheet-sub", goToDone);
             } else if (res.ok) {
@@ -1686,12 +2063,12 @@
               CHANNELS.forEach((ch, i) => {
                 const b = items[i]?.querySelector(".sub-btn");
                 if (b) {
+                  const isB = ch.type === "bot";
                   if (res.results?.[String(ch.id)]) {
                     b.textContent = "✓";
                     b.classList.add("done");
                   } else {
-                    b.textContent =
-                      ch.type === "bot" ? "Открыть" : "Подписаться";
+                    b.textContent = isB ? "Открыть" : "Подписаться";
                     b.classList.remove("done");
                   }
                 }
@@ -1700,12 +2077,24 @@
               toast("Подпишитесь на все каналы!");
               hapticNotif("error");
             } else toast("Ошибка, попробуйте позже");
+          } catch (e) {
+            toast("Ошибка, попробуйте позже");
           } finally {
             btn.disabled = false;
-            btn.textContent = "Проверить подписку";
+            btn.querySelector("span").textContent = "Проверить подписку";
             isChecking = false;
           }
         });
+
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║           MODULE 11: DONE SCENE (TIMER)                 ║
+           ╚══════════════════════════════════════════════════════════╝ */
+        function setupDoneIcons() {
+          playIcon($("done-check"), TGS.check);
+          playIcon($("pill-lightning"), TGS.lightning);
+          playIcon($("btn-rocket-tgs"), TGS.rocket);
+          playIcon($("btn-star-tgs"), TGS.star);
+        }
 
         function resetTimerDots() {
           $("tp2").className = "tp-dot active";
@@ -1720,27 +2109,29 @@
         }
 
         function goToDone() {
+          killLotties();
+          const pKey = wonPrize ? wonPrize.key : US?.prize_key || "stars";
           const pName = wonPrize ? wonPrize.name : US?.prize_name || "Приз";
-          $("done-prize").textContent = pName;
-          const si = SECTORS.findIndex(
-            (s) => pName.includes(s.label) || pName.includes(s.brand),
-          );
-          $("done-sticker").textContent = si >= 0 ? SECTORS[si].emoji : "🎁";
-
+          const meta = getMeta(pKey);
+          const dp = $("done-prize");
+          dp.textContent = pName;
+          dp.className = "done-prize" + (meta.shine ? " " + meta.shine : "");
+          playLottie($("done-sticker"), meta.modal, false);
           if (!claimedAt) claimedAt = US?.claimed_at || Date.now() / 1000;
           refCount = US?.referral_count || refCount || 0;
           tSpeed = calcSpeed(refCount);
-
           $("done-actions-timer").classList.remove("hidden");
           $("done-actions-final").classList.add("hidden");
           resetTimerDots();
           startTimer();
+          setupDoneIcons();
           showScene("done");
-          confetti({
-            particleCount: 100,
-            spread: 100,
-            origin: { y: 0.5 },
-            colors: ["#d2ff00", "#ffffff"],
+          confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } });
+          gsap.from(".done-wrap", {
+            y: 40,
+            opacity: 0,
+            duration: 0.5,
+            ease: "back.out(1.5)",
           });
           appState = "final";
         }
@@ -1755,12 +2146,12 @@
           if (!claimedAt) return;
           const rem = Math.max(
             0,
-            T_SEC - (Date.now() / 1000 - claimedAt) * tSpeed,
+            CONFIG.TIMER_SECONDS - (Date.now() / 1000 - claimedAt) * tSpeed,
           );
           const t = fmtTime(rem);
           const te = $("timer-time"),
-            sp = $("timer-speed"),
-            pill = $("timer-pill"),
+            sp = $("timer-speed");
+          const pill = $("timer-pill"),
             dot = $("timer-dot"),
             st = $("timer-text");
           if (sp) sp.textContent = "x" + tSpeed;
@@ -1770,34 +2161,52 @@
               : pill.classList.remove("fast");
           }
           if (!t) {
-            te.textContent = "Готово!";
-            te.classList.add("done");
-            dot.classList.add("done");
-            st.textContent = "Приз готов к выдаче!";
-            [$("tp2"), $("tp3")].forEach((el) => {
-              el.className = "tp-dot done";
-              el.textContent = "✓";
-            });
-            $("tl2").className = "tp-line done";
-            $("tlbl2").className = "tp-label done-l";
-            $("tlbl2").textContent = "Готово";
-            $("tlbl3").className = "tp-label done-l";
-            $("tlbl3").textContent = "Выдан";
-            pill.style.display = "none";
+            if (te) {
+              te.textContent = "Готово!";
+              te.classList.add("done");
+            }
+            if (dot) dot.classList.add("done");
+            if (st) st.textContent = "Приз готов к выдаче!";
+            const tp2 = $("tp2"),
+              tp3 = $("tp3"),
+              tl2 = $("tl2"),
+              tlbl2 = $("tlbl2"),
+              tlbl3 = $("tlbl3");
+            if (tp2) {
+              tp2.className = "tp-dot done";
+              tp2.textContent = "✓";
+            }
+            if (tp3) {
+              tp3.className = "tp-dot done";
+              tp3.textContent = "✓";
+            }
+            if (tl2) tl2.className = "tp-line done";
+            if (tlbl2) {
+              tlbl2.className = "tp-label done-l";
+              tlbl2.textContent = "Готово";
+            }
+            if (tlbl3) {
+              tlbl3.className = "tp-label done-l";
+              tlbl3.textContent = "Выдан";
+            }
+            if (pill) pill.style.display = "none";
             $("done-actions-timer").classList.add("hidden");
             $("done-actions-final").classList.remove("hidden");
             clearInterval(tInt);
             return;
           }
-          te.textContent = t;
-          te.classList.remove("done");
-          dot.classList.remove("done");
-          st.textContent = "Подготавливаем приз...";
+          if (te) {
+            te.textContent = t;
+            te.classList.remove("done");
+          }
+          if (dot) dot.classList.remove("done");
+          if (st) st.textContent = "Подготавливаем приз...";
         }
 
         $("btn-finalize").addEventListener("click", async () => {
           const btn = $("btn-finalize");
           btn.disabled = true;
+          btn.classList.remove("pulse");
           btn.querySelector("span").textContent = "Обработка...";
           const res = await api("process-action", { action: "finalize_claim" });
           if (res.ok) {
@@ -1808,11 +2217,14 @@
           } else {
             toast(res.error || "Ошибка", "error");
             btn.disabled = false;
+            btn.classList.add("pulse");
             btn.querySelector("span").textContent = "🎁 Получить приз";
           }
         });
 
-        /* ═══════════ ОРИГИНАЛЬНАЯ ЛОГИКА: SPEED / SHARE ═══════════ */
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║           MODULE 12: REFERRAL / SHARE / EARN            ║
+           ╚══════════════════════════════════════════════════════════╝ */
         $("btn-speedup").addEventListener("click", () => {
           $("su-refs").textContent = refCount;
           $("su-speed").textContent = "x" + tSpeed;
@@ -1825,6 +2237,8 @@
             }
           });
           $("ref-fill").style.width = Math.min(100, (refCount / 8) * 100) + "%";
+          playIcon($("su-rocket-tgs"), TGS.rocket);
+          playIcon($("share-invite-tgs"), TGS.invite);
           openSheet("sheet-speed");
         });
         $("btn-back-speed").addEventListener("click", () =>
@@ -1866,9 +2280,9 @@
 
         function shareFallback() {
           const uid = US?.telegram_id || "";
-          const link = `https://t.me/${BOT}?start=ref_${uid}`;
+          const link = `https://t.me/${CONFIG.BOT}?start=ref_${uid}`;
           const text =
-            "🍏 Крути рулетку Золотого Яблока и выиграй подарок!\n\n💄 Dior, MAC, Dyson\n✨ Это бесплатно! Жми 👇";
+            "🎁 Тебе подарок!\n\nНарисуй звезду и получи один из призов:\n⭐ 500 Telegram Stars\n💎 Telegram Premium\n\nЭто бесплатно! Жми на кнопку 👇";
           const shareUrl =
             "https://t.me/share/url?url=" +
             encodeURIComponent(link) +
@@ -1881,10 +2295,10 @@
           }
         }
 
-        /* ═══════════ ОРИГИНАЛЬНАЯ ЛОГИКА: ADMIN / STARS ═══════════ */
         $("btn-earn-stars").addEventListener("click", async () => {
           $("modal-stars").classList.remove("hidden");
           updateBackBtn();
+          playIcon($("modal-star-tgs"), TGS.star);
           const c = $("stars-content");
           if (!c.innerHTML) {
             try {
@@ -1925,15 +2339,25 @@
           $("stars-content").classList.remove("hidden");
         });
 
-        /* ═══════════ INIT ═══════════ */
+        /* ╔══════════════════════════════════════════════════════════╗
+           ║           MODULE 13: INIT & ROUTING                     ║
+           ╚══════════════════════════════════════════════════════════╝ */
+        function cleanup() {
+          if (tInt) clearInterval(tInt);
+          killLotties();
+          killIcons();
+        }
+        window.addEventListener("beforeunload", cleanup);
+
         async function init() {
           try {
             Telegram.WebApp.expand();
             Telegram.WebApp.disableVerticalSwipes();
-            Telegram.WebApp.setHeaderColor("#eceef1"); // Цвет фона ЗЯ
-            Telegram.WebApp.setBackgroundColor("#d5d8df");
+            Telegram.WebApp.setHeaderColor("#eceef1");
+            Telegram.WebApp.setBackgroundColor("#eceef1");
           } catch (e) {}
 
+          const allTgs = Object.values(TGS).map((u) => loadTGS(u));
           try {
             const res = await api("get-user");
             if (res.ok) {
@@ -1945,7 +2369,7 @@
               if (res.user.claimed_at) claimedAt = res.user.claimed_at;
             }
           } catch (e) {}
-
+          await Promise.all(allTgs);
           $("scene-loading").style.opacity = "0";
           await sleep(300);
           try {
@@ -1957,68 +2381,67 @@
             return;
           }
 
-          setupRoulette();
-
           if (US.state === "completed") {
-            showScene("done", true);
-            $("done-prize").textContent = US.prize_name || "Приз";
-            const si = SECTORS.findIndex(
-              (s) =>
-                (US.prize_name || "").includes(s.label) ||
-                (US.prize_name || "").includes(s.brand),
-            );
-            $("done-sticker").textContent = si >= 0 ? SECTORS[si].emoji : "🎁";
-            $("timer-time").textContent = "Получено!";
-            $("timer-time").classList.add("done");
-            $("timer-dot").classList.add("done");
-            $("timer-text").textContent = "Приз выдан";
-            $("timer-pill").style.display = "none";
-            ["tp1", "tp2", "tp3"].forEach((id) => {
-              $(id).className = "tp-dot done";
-              $(id).textContent = "✓";
-            });
-            ["tl1", "tl2"].forEach((id) => {
-              $(id).className = "tp-line done";
-            });
-            $("tlbl1").className = "tp-label done-l";
-            $("tlbl1").textContent = "Получен";
-            $("tlbl2").className = "tp-label done-l";
-            $("tlbl2").textContent = "Готово";
-            $("tlbl3").className = "tp-label done-l";
-            $("tlbl3").textContent = "Выдан";
-            $("done-actions-timer").classList.add("hidden");
-            $("done-actions-final").classList.remove("hidden");
-            $("btn-finalize").disabled = true;
-            $("btn-finalize").querySelector("span").textContent = "✅ Получено";
-            appState = "final";
-            return;
-          }
-
-          if (US.state === "claimed") {
+            routeCompleted();
+          } else if (US.state === "claimed") {
             wonPrize = {
               key: US.prize_key || "stars",
               name: US.prize_name || "Приз",
             };
             goToDone();
-            return;
-          }
-
-          if (US.state === "rolled") {
+          } else if (US.state === "rolled") {
             wonPrize = {
               key: US.prize_key || "stars",
               name: US.prize_name || "Приз",
             };
-            showScene("wheel", true);
-            $("wheel-spin-btn").disabled = true;
-            $("wheel-spin-btn").textContent = "—";
+            initGame();
             await sleep(200);
             showSub();
-            return;
+          } else {
+            initGame();
           }
-
-          showScene("wheel", true);
-          appState = "wheel";
         }
+
+        function routeCompleted() {
+          const meta = getMeta(US.prize_key || "stars");
+          showScene("done", true);
+          const dp = $("done-prize");
+          dp.textContent = US.prize_name || "Приз";
+          dp.className = "done-prize" + (meta.shine ? " " + meta.shine : "");
+          playLottie($("done-sticker"), meta.modal, false);
+          $("timer-time").textContent = "Получено!";
+          $("timer-time").classList.add("done");
+          $("timer-dot").classList.add("done");
+          $("timer-text").textContent = "Приз выдан";
+          $("timer-pill").style.display = "none";
+          ["tp1", "tp2", "tp3"].forEach((id) => {
+            $(id).className = "tp-dot done";
+            $(id).textContent = "✓";
+          });
+          ["tl1", "tl2"].forEach((id) => {
+            $(id).className = "tp-line done";
+          });
+          $("tlbl1").className = "tp-label done-l";
+          $("tlbl1").textContent = "Получен";
+          $("tlbl2").className = "tp-label done-l";
+          $("tlbl2").textContent = "Готово";
+          $("tlbl3").className = "tp-label done-l";
+          $("tlbl3").textContent = "Выдан";
+          $("done-actions-timer").classList.add("hidden");
+          $("done-actions-final").classList.remove("hidden");
+          $("btn-finalize").disabled = true;
+          $("btn-finalize").classList.remove("pulse");
+          $("btn-finalize").querySelector("span").textContent = "✅ Получено";
+          setupDoneIcons();
+          gsap.from(".done-wrap", {
+            y: 30,
+            opacity: 0,
+            duration: 0.5,
+            delay: 0.1,
+          });
+          appState = "final";
+        }
+
         init();
       }
     </script>
